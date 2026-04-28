@@ -1,0 +1,27 @@
+{
+  "name": "溪玉机",
+  "short_name": "溪玉机",
+  "id": "./index.html",
+  "description": "iOS Theme Studio Standalone App",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f4f5",
+  "theme_color": "#f4f4f5",
+  "lang": "zh-CN",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://i.postimg.cc/1RGRdT9k/IMG-20260427-175620.png",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.postimg.cc/1RGRdT9k/IMG-20260427-175620.png",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
