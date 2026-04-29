@@ -442,10 +442,15 @@ function openMallPaymentModal(isGift = false) {
 
     let hasFamilyCard = false;
     let familyCardLimit = 0;
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.startsWith(`family_card_received_${accountId}_`)) {
-            const card = JSON.parse(localStorage.getItem(key));
+    let charsList = JSON.parse(ChatDB.getItem('chat_chars') || '[]');
+    let accountsList = JSON.parse(ChatDB.getItem('chat_accounts') || '[]');
+    let npcsList = JSON.parse(ChatDB.getItem('chat_npcs') || '[]');
+    let allEntities = [...charsList, ...accountsList, ...npcsList];
+    
+    for (let entity of allEntities) {
+        let cardStr = ChatDB.getItem(`family_card_received_${accountId}_${entity.id}`);
+        if (cardStr) {
+            let card = JSON.parse(cardStr);
             if (card && card.limit >= pendingMallPaymentAmount) {
                 hasFamilyCard = true;
                 familyCardLimit = card.limit;
@@ -506,10 +511,15 @@ function toggleMallPaymentMethod() {
     const accountId = ChatDB.getItem('current_mall_login');
     let hasFamilyCard = false;
     let familyCardLimit = 0;
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.startsWith(`family_card_received_${accountId}_`)) {
-            const card = JSON.parse(localStorage.getItem(key));
+    let charsList = JSON.parse(ChatDB.getItem('chat_chars') || '[]');
+    let accountsList = JSON.parse(ChatDB.getItem('chat_accounts') || '[]');
+    let npcsList = JSON.parse(ChatDB.getItem('chat_npcs') || '[]');
+    let allEntities = [...charsList, ...accountsList, ...npcsList];
+    
+    for (let entity of allEntities) {
+        let cardStr = ChatDB.getItem(`family_card_received_${accountId}_${entity.id}`);
+        if (cardStr) {
+            let card = JSON.parse(cardStr);
             if (card && card.limit >= pendingMallPaymentAmount) {
                 hasFamilyCard = true;
                 familyCardLimit = card.limit;
@@ -589,10 +599,16 @@ function executeMallPayment(inputPwd, isFreePay = false) {
         });
         ChatDB.setItem(`wallet_history_${accountId}`, JSON.stringify(walletHistory));
     } else if (currentMallPaymentMethod === 'family_card') {
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key.startsWith(`family_card_received_${accountId}_`)) {
-                let card = JSON.parse(localStorage.getItem(key));
+        let charsList = JSON.parse(ChatDB.getItem('chat_chars') || '[]');
+        let accountsList = JSON.parse(ChatDB.getItem('chat_accounts') || '[]');
+        let npcsList = JSON.parse(ChatDB.getItem('chat_npcs') || '[]');
+        let allEntities = [...charsList, ...accountsList, ...npcsList];
+        
+        for (let entity of allEntities) {
+            let key = `family_card_received_${accountId}_${entity.id}`;
+            let cardStr = ChatDB.getItem(key);
+            if (cardStr) {
+                let card = JSON.parse(cardStr);
                 if (card && card.limit >= pendingMallPaymentAmount) {
                     card.limit -= pendingMallPaymentAmount;
                     ChatDB.setItem(key, JSON.stringify(card));
@@ -845,10 +861,16 @@ function executeMallGiftPay() {
             ChatDB.setItem(`wallet_balance_${accountId}`, balance.toFixed(2));
         } else if (currentMallPaymentMethod === 'family_card') {
             let paid = false;
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key.startsWith(`family_card_received_${accountId}_`)) {
-                    let card = JSON.parse(localStorage.getItem(key));
+            let charsList = JSON.parse(ChatDB.getItem('chat_chars') || '[]');
+            let accountsList = JSON.parse(ChatDB.getItem('chat_accounts') || '[]');
+            let npcsList = JSON.parse(ChatDB.getItem('chat_npcs') || '[]');
+            let allEntities = [...charsList, ...accountsList, ...npcsList];
+            
+            for (let entity of allEntities) {
+                let key = `family_card_received_${accountId}_${entity.id}`;
+                let cardStr = ChatDB.getItem(key);
+                if (cardStr) {
+                    let card = JSON.parse(cardStr);
                     if (card && card.limit >= pendingMallPaymentAmount) {
                         card.limit -= pendingMallPaymentAmount;
                         ChatDB.setItem(key, JSON.stringify(card));
@@ -1495,6 +1517,7 @@ async function generateMallDataAPI(charId) {
     const persona = personas.find(p => p.id === (account ? account.personaId : null));
     const userDesc = persona ? persona.persona : '普通用户';
     const userName = account ? (account.netName || 'User') : 'User';
+    const userRealName = persona ? (persona.realName || userName) : userName;
 
     // 获取选中的商城世界书
     let activeWbs = [];
@@ -1510,7 +1533,7 @@ async function generateMallDataAPI(charId) {
     // 构建 Prompt
     let prompt = `你现在正在扮演角色：${char.name}。\n`;
     prompt += `【你的设定】：${char.description || '无'}\n`;
-    prompt += `【用户身份】：用户(${userName})在你的生活中的角色/人设是：${userDesc}。\n`;
+    prompt += `【用户身份】：用户的网名是：【${userName}】，真实名字是：【${userRealName}】。请严格区分网名和真名。TA在你的生活中的角色/人设是：${userDesc}。\n`;
     
     if (activeWbs.length > 0) {
         prompt += `【世界书背景】：\n${activeWbs.join('\n')}\n`;

@@ -1502,6 +1502,11 @@ function openMusicPlayer() {
                 player.style.backgroundImage = `url('${savedBg}')`;
             }
         }
+        // 【修复】：如果正在一起听歌，打开全屏播放器时恢复显示一起听歌状态
+        const statusEl = document.getElementById('mpListenTogetherStatus');
+        if (statusEl && window.currentListenTogetherCharId) {
+            statusEl.style.display = 'flex';
+        }
     }
 }
 
@@ -1509,8 +1514,9 @@ function openMusicPlayer() {
 function closeMusicPlayer() {
     const player = document.getElementById('musicPlayerPanel');
     if (player) player.style.display = 'none';
-    const statusEl = document.getElementById('mpListenTogetherStatus');
-    if (statusEl) statusEl.style.display = 'none';
+    // 【修复】：不要在这里隐藏一起听歌状态，否则下次打开播放器会消失
+    // const statusEl = document.getElementById('mpListenTogetherStatus');
+    // if (statusEl) statusEl.style.display = 'none';
 }
 
 // 【新增】：获取网易云推荐歌单
@@ -2108,6 +2114,8 @@ async function generateCharPlaylistAPI() {
     const account = accounts.find(a => a.id === currentLoginId);
     let personas = JSON.parse(ChatDB.getItem('chat_personas') || '[]');
     const persona = personas.find(p => p.id === (account ? account.personaId : null));
+    const userName = account ? (account.netName || 'User') : 'User';
+    const userRealName = persona ? (persona.realName || userName) : userName;
 
     // 获取世界书
     let activeWbs = [];
@@ -2119,6 +2127,7 @@ async function generateCharPlaylistAPI() {
 
     const prompt = `你是一个资深的音乐DJ。请根据以下角色设定，为该角色生成一个符合其性格、背景和喜好的专属歌单。
 【角色设定】：${char.description || '无'}
+【用户身份】：我的网名是：【${userName}】，我的真实名字是：【${userRealName}】。请严格区分网名和真名。
 【用户设定】：${persona ? persona.persona : '无'}
 【世界书背景】：${activeWbs.join('\n')}
 
@@ -2844,11 +2853,18 @@ async function generateCharRecentMusicAPI(charId) {
     if (!char) return;
 
     const currentLoginId = ChatDB.getItem('current_login_account');
+    const account = allEntities.find(a => a.id === currentLoginId);
+    let personas = JSON.parse(ChatDB.getItem('chat_personas') || '[]');
+    const persona = personas.find(p => p.id === (account ? account.personaId : null));
+    const userName = account ? (account.netName || 'User') : 'User';
+    const userRealName = persona ? (persona.realName || userName) : userName;
+
     let history = JSON.parse(ChatDB.getItem(`chat_history_${currentLoginId}_${charId}`) || '[]');
-    let recentHistory = history.slice(-15).map(m => `${m.role === 'user' ? 'User' : 'Char'}: ${m.content}`).join('\n');
+    let recentHistory = history.slice(-15).map(m => `${m.role === 'user' ? userName : char.name}: ${m.content}`).join('\n');
 
     const prompt = `你是一个情感细腻的音乐分析师。请根据角色【${char.name}】的设定以及TA最近的聊天记录，推测TA最近的心境，并生成一份TA最近单曲循环最多的 10 首真实存在的歌曲。
 【角色设定】：${char.description || '无'}
+【用户身份】：我的网名是：【${userName}】，我的真实名字是：【${userRealName}】。请严格区分网名和真名。
 【最近聊天记录】：
 ${recentHistory || '暂无聊天记录'}
 

@@ -381,6 +381,7 @@ async function generateTiktokDataAPI() {
     const persona = personas.find(p => p.id === (account ? account.personaId : null));
     const userDesc = persona ? persona.persona : '普通用户';
     const userName = account ? (account.netName || 'User') : 'User';
+    const userRealName = persona ? (persona.realName || userName) : userName;
 
     // 2. 获取世界书
     let activeWbs = [];
@@ -397,7 +398,7 @@ async function generateTiktokDataAPI() {
     // 4. 构建 Prompt
     let prompt = `你现在正在扮演角色：${char.name}。\n`;
     prompt += `【你的设定】：${char.description || '无'}\n`;
-    prompt += `【用户身份】：用户(${userName})在你的生活中的角色/人设是：${userDesc}。\n`;
+    prompt += `【用户身份】：用户的网名是：【${userName}】，真实名字是：【${userRealName}】。请严格区分网名和真名。TA在你的生活中的角色/人设是：${userDesc}。\n`;
     
     if (activeWbs.length > 0) {
         prompt += `【世界书背景】：\n${activeWbs.join('\n')}\n`;
@@ -867,6 +868,7 @@ async function generatePhoneNotesAPI() {
     const persona = personas.find(p => p.id === (account ? account.personaId : null));
     const userDesc = persona ? persona.persona : '普通用户';
     const userName = account ? (account.netName || 'User') : 'User';
+    const userRealName = persona ? (persona.realName || userName) : userName;
 
     // 2. 获取世界书
     let activeWbs = [];
@@ -883,7 +885,7 @@ async function generatePhoneNotesAPI() {
     // 4. 构建 Prompt
     let prompt = `你现在正在扮演角色：${char.name}。\n`;
     prompt += `【你的设定】：${char.description || '无'}\n`;
-    prompt += `【用户身份】：用户(${userName})在你的生活中的角色/人设是：${userDesc}。\n`;
+    prompt += `【用户身份】：用户的网名是：【${userName}】，真实名字是：【${userRealName}】。请严格区分网名和真名。TA在你的生活中的角色/人设是：${userDesc}。\n`;
     
     if (activeWbs.length > 0) {
         prompt += `【世界书背景】：\n${activeWbs.join('\n')}\n`;
@@ -1085,6 +1087,7 @@ async function generatePhoneShopAPI() {
     const persona = personas.find(p => p.id === (account ? account.personaId : null));
     const userDesc = persona ? persona.persona : '普通用户';
     const userName = account ? (account.netName || 'User') : 'User';
+    const userRealName = persona ? (persona.realName || userName) : userName;
 
     // 2. 获取世界书
     let activeWbs = [];
@@ -1101,7 +1104,7 @@ async function generatePhoneShopAPI() {
     // 4. 构建 Prompt
     let prompt = `你现在正在扮演角色：${char.name}。\n`;
     prompt += `【你的设定】：${char.description || '无'}\n`;
-    prompt += `【用户身份】：用户(${userName})在你的生活中的角色/人设是：${userDesc}。\n`;
+    prompt += `【用户身份】：用户的网名是：【${userName}】，真实名字是：【${userRealName}】。请严格区分网名和真名。TA在你的生活中的角色/人设是：${userDesc}。\n`;
     
     if (activeWbs.length > 0) {
         prompt += `【世界书背景】：\n${activeWbs.join('\n')}\n`;
@@ -1458,6 +1461,7 @@ async function generatePhoneGalleryAPI() {
     const persona = personas.find(p => p.id === (account ? account.personaId : null));
     const userDesc = persona ? persona.persona : '普通用户';
     const userName = account ? (account.netName || 'User') : 'User';
+    const userRealName = persona ? (persona.realName || userName) : userName;
 
     // 2. 获取世界书
     let activeWbs = [];
@@ -1474,7 +1478,7 @@ async function generatePhoneGalleryAPI() {
     // 4. 构建 Prompt
     let prompt = `你现在正在扮演角色：${char.name}。\n`;
     prompt += `【你的设定】：${char.description || '无'}\n`;
-    prompt += `【用户身份】：用户(${userName})在你的生活中的角色/人设是：${userDesc}。\n`;
+    prompt += `【用户身份】：用户的网名是：【${userName}】，真实名字是：【${userRealName}】。请严格区分网名和真名。TA在你的生活中的角色/人设是：${userDesc}。\n`;
     
     if (activeWbs.length > 0) {
         prompt += `【世界书背景】：\n${activeWbs.join('\n')}\n`;
@@ -1858,6 +1862,7 @@ async function generatePhoneBrowserAPI() {
     const persona = personas.find(p => p.id === (account ? account.personaId : null));
     const userDesc = persona ? persona.persona : '普通用户';
     const userName = account ? (account.netName || 'User') : 'User';
+    const userRealName = persona ? (persona.realName || userName) : userName;
 
     // 2. 获取世界书
     let activeWbs = [];
@@ -1874,7 +1879,7 @@ async function generatePhoneBrowserAPI() {
     // 4. 构建 Prompt
     let prompt = `你现在正在扮演角色：${char.name}。\n`;
     prompt += `【你的设定】：${char.description || '无'}\n`;
-    prompt += `【用户身份】：用户(${userName})在你的生活中的角色/人设是：${userDesc}。\n`;
+    prompt += `【用户身份】：用户的网名是：【${userName}】，真实名字是：【${userRealName}】。请严格区分网名和真名。TA在你的生活中的角色/人设是：${userDesc}。\n`;
     
     if (activeWbs.length > 0) {
         prompt += `【世界书背景】：\n${activeWbs.join('\n')}\n`;
@@ -2098,6 +2103,7 @@ async function generatePhoneDoubaoAPI() {
     const persona = personas.find(p => p.id === (account ? account.personaId : null));
     const userDesc = persona ? persona.persona : '普通用户';
     const userName = account ? (account.netName || 'User') : 'User';
+    const userRealName = persona ? (persona.realName || userName) : userName;
 
     let activeWbs = [];
     let wbData = JSON.parse(ChatDB.getItem('worldbook_data')) || { entries: [] };
@@ -2109,7 +2115,7 @@ async function generatePhoneDoubaoAPI() {
 
     let prompt = `你现在正在扮演角色：${char.name}。\n`;
     prompt += `【你的设定】：${char.description || '无'}\n`;
-    prompt += `【用户身份】：用户(${userName})在你的生活中的角色/人设是：${userDesc}。\n`;
+    prompt += `【用户身份】：用户的网名是：【${userName}】，真实名字是：【${userRealName}】。请严格区分网名和真名。TA在你的生活中的角色/人设是：${userDesc}。\n`;
     if (activeWbs.length > 0) prompt += `【世界书背景】：\n${activeWbs.join('\n')}\n`;
     if (recentHistory) prompt += `【最近的聊天记录参考】：\n${recentHistory}\n`;
 
@@ -2229,6 +2235,7 @@ async function generatePhoneIcityAPI() {
     const persona = personas.find(p => p.id === (account ? account.personaId : null));
     const userDesc = persona ? persona.persona : '普通用户';
     const userName = account ? (account.netName || 'User') : 'User';
+    const userRealName = persona ? (persona.realName || userName) : userName;
 
     // 2. 获取世界书
     let activeWbs = [];
@@ -2245,7 +2252,7 @@ async function generatePhoneIcityAPI() {
     // 4. 构建 Prompt
     let prompt = `你现在正在扮演角色：${char.name}。\n`;
     prompt += `【你的设定】：${char.description || '无'}\n`;
-    prompt += `【用户身份】：用户(${userName})在你的生活中的角色/人设是：${userDesc}。\n`;
+    prompt += `【用户身份】：用户的网名是：【${userName}】，真实名字是：【${userRealName}】。请严格区分网名和真名。TA在你的生活中的角色/人设是：${userDesc}。\n`;
     
     if (activeWbs.length > 0) {
         prompt += `【世界书背景】：\n${activeWbs.join('\n')}\n`;
@@ -2295,9 +2302,31 @@ async function generatePhoneIcityAPI() {
 }
 
 // ==========================================
-// 查手机 - 一键生成所有 APP 数据
+// 查手机 - 一键生成 APP 数据 (支持自主选择)
 // ==========================================
-async function generateAllPhoneDataAPI() {
+function openPhoneGenerateModal() {
+    document.getElementById('charSidebar').classList.remove('open');
+    document.getElementById('phoneGenerateModalOverlay').classList.add('show');
+}
+
+function closePhoneGenerateModal() {
+    document.getElementById('phoneGenerateModalOverlay').classList.remove('show');
+}
+
+function confirmPhoneGenerate() {
+    const checkboxes = document.querySelectorAll('.phone-gen-checkbox:checked');
+    const selectedApps = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (selectedApps.length === 0) {
+        alert('请至少选择一个 APP！');
+        return;
+    }
+    
+    closePhoneGenerateModal();
+    generateAllPhoneDataAPI(selectedApps);
+}
+
+async function generateAllPhoneDataAPI(selectedApps) {
     if (!currentChatRoomCharId) return alert('请先进入聊天室！');
     const apiConfig = JSON.parse(ChatDB.getItem('current_api_config') || '{}');
     if (!apiConfig.url || !apiConfig.key || !apiConfig.model) return alert('请先配置 API！');
@@ -2314,6 +2343,7 @@ async function generateAllPhoneDataAPI() {
     const persona = personas.find(p => p.id === (account ? account.personaId : null));
     const userDesc = persona ? persona.persona : '普通用户';
     const userName = account ? (account.netName || 'User') : 'User';
+    const userRealName = persona ? (persona.realName || userName) : userName;
 
     // 获取世界书
     let activeWbs = [];
@@ -2330,7 +2360,7 @@ async function generateAllPhoneDataAPI() {
     // 构建超级 Prompt
     let prompt = `你现在正在扮演角色：${char.name}。\n`;
     prompt += `【你的设定】：${char.description || '无'}\n`;
-    prompt += `【用户身份】：用户(${userName})在你的生活中的角色/人设是：${userDesc}。\n`;
+    prompt += `【用户身份】：用户的网名是：【${userName}】，真实名字是：【${userRealName}】。请严格区分网名和真名。TA在你的生活中的角色/人设是：${userDesc}。\n`;
     
     if (activeWbs.length > 0) {
         prompt += `【世界书背景】：\n${activeWbs.join('\n')}\n`;
@@ -2340,54 +2370,51 @@ async function generateAllPhoneDataAPI() {
         prompt += `【最近的聊天记录参考】：\n${recentHistory}\n`;
     }
 
-    prompt += `\n请基于你的人设、当前生活状态，以及我们最近的聊天上下文，一次性生成你手机里所有 APP 的数据。
-为了防止数据过大，请严格控制生成数量：
-1. TikTok: 
-   - foryou(推荐): 2条路人发布的视频(包含videoContent画面描述)。
-   - profile(个人主页): 2条你自己发布的视频，画面(videoContent)和文案必须与 User(${userName}) 相关，表达你的真实情绪。
-   - inbox(私信): 2条私信，内容必须是别人对你主页视频的搭讪或反应。
-2. Notes(备忘录): 2篇日记/备忘。
-3. Shop(商城): 2个首页推荐，1个购物车商品。
-4. Gallery(相册): 2个相册，1条录音。
-5. Browser(浏览器): 3条搜索记录，1个论坛帖子。
-6. icity(私密日记): 1篇短日记。
-7. doudou(豆豆): 包含 doubao(愚蠢馊主意)、tarot(不靠谱的塔罗占卜)、answer(不靠谱的答案之书) 三个AI助手的简短对话记录(各2-3个回合)。
+    prompt += `\n请基于你的人设、当前生活状态，以及我们最近的聊天上下文，一次性生成你手机里选定 APP 的数据。\n`;
+    prompt += `为了防止数据过大，请严格控制生成数量，只生成以下被选中的 APP 数据：\n\n`;
 
-必须返回合法的 JSON 对象，结构必须严格如下：
-{
-  "tiktok": {
-    "foryou": [{"author": "路人", "videoContent": "画面描述", "desc": "文案", "likes": "10K", "commentsCount": "100", "music": "音乐", "comments": [{"user": "A", "content": "评论"}]}],
-    "profile": [{"videoContent": "画面描述(与User相关)", "desc": "文案", "likes": "10K", "commentsCount": "100", "comments": [{"user": "A", "content": "评论"}]}],
-    "inbox": [{"name": "发件人", "lastMsg": "消息", "time": "1h", "history": [{"role": "other", "content": "搭讪"}]}]
-  },
-  "notes": [
-    { "title": "标题", "count": "1 个备忘录", "detailTitle": "详细标题", "detailTime": "时间", "detailContent": "内容" }
-  ],
-  "shop": {
-    "home": [{"title": "商品", "price": "99", "imageDesc": "图片描述", "description": "详情"}],
-    "cart": [{"title": "商品", "sku": "规格", "price": "99", "qty": 1, "imageDesc": "图片描述", "description": "详情"}]
-  },
-  "gallery": {
-    "albums": [{"title": "相册名", "time": "时间", "coverDesc": "封面描述"}],
-    "records": [{"title": "录音名", "time": "时间", "duration": "00:01:00", "size": "1MB", "content": "录音内容"}]
-  },
-  "browser": {
-    "history": [{"keyword": "搜索词", "thought": "内心想法"}],
-    "tabs": [{"title": "帖子标题", "content": "帖子内容", "comments": [{"user": "网友", "text": "评论"}]}]
-  },
-  "icity": {
-    "content": "日记内容",
-    "time": "时间"
-  },
-  "doubao": {
-    "doubao": [{"role": "user", "content": "提问"}, {"role": "ai", "content": "愚蠢回答"}],
-    "tarot": [{"role": "user", "content": "提问"}, {"role": "ai", "content": "塔罗回答"}],
-    "answer": [{"role": "user", "content": "提问"}, {"role": "ai", "content": "简短回答"}]
-  }
-}`;
+    let jsonStructure = "{\n";
+    let structureParts = [];
 
-    document.getElementById('charSidebar').classList.remove('open');
-    showToast('正在一键生成所有数据(耗时较长，请耐心等待)...', 'loading');
+    if (selectedApps.includes('tiktok')) {
+        prompt += `1. TikTok (抖音):\n【核心生成要求】：\n- 首页推荐 (foryou)：生成 3-5 个视频。必须是其他NPC/路人发布的视频（绝对不能是你自己）。内容必须和最近聊天的话题相关，或者是你潜意识里关注的事物。必须生成 5 条具体的网友评论。\n- 个人主页 (profile)：生成你自己发布的 4 个视频。这些视频的文案(desc)和画面(videoContent)都必须和 User(${userName}) 有关，表达对 User 的真实情绪，或者是记录 User 相关的事情！必须生成 5 条具体的网友评论。\n- 抖音热搜 (trending)：生成 4-6 个热搜标题。符合当前世界观或你的兴趣。\n- 私信消息 (inbox)：生成 2-4 条私信。【重点】：私信内容必须是路人或熟人对你在个人主页 (profile) 发布的视频的反应或搭讪！\n\n`;
+        structureParts.push(`  "tiktok": {\n    "foryou": [\n      {\n        "author": "路人作者名",\n        "videoContent": "视频画面内容的详细描述",\n        "desc": "视频文案",\n        "likes": "1.2M",\n        "commentsCount": "45K",\n        "music": "音乐名",\n        "comments": [\n          {"user": "网友A", "content": "评论内容"}\n        ]\n      }\n    ],\n    "trending": [\n      {"title": "热搜标题", "hot": "123W"}\n    ],\n    "profile": [\n      {\n        "videoContent": "视频画面内容的详细描述(必须与${userName}有关)",\n        "desc": "视频文案(必须与${userName}有关)",\n        "likes": "10K",\n        "commentsCount": "120",\n        "comments": [\n          {"user": "网友B", "content": "评论内容"}\n        ]\n      }\n    ],\n    "inbox": [\n      {\n        "name": "发件人(路人/熟人)",\n        "lastMsg": "最后一条消息",\n        "time": "1h",\n        "history": [\n          {"role": "other", "content": "针对你发布的某个视频的搭讪或反应"},\n          {"role": "me", "content": "你的回复"}\n        ]\n      }\n    ],\n    "drafts": [\n      {"desc": "草稿描述，例如：尝试了新的猫咪特效，太搞笑了"}\n    ]\n  }`);
+    }
+
+    if (selectedApps.includes('notes')) {
+        prompt += `2. Notes (备忘录):\n备忘录的内容应该非常私密、真实，可以包含你对 ${userName} 的吐槽、暗恋、计划，或者你自己的日常琐事、购物清单、日记等。\n包含 4-6 个文件夹（每个文件夹对应一篇详细的备忘录）。\n\n`;
+        structureParts.push(`  "notes": [\n    {\n      "title": "文件夹标题(如: 购物清单)",\n      "count": "3 个备忘录",\n      "detailTitle": "备忘录详细标题",\n      "detailTime": "2023年10月25日 14:30",\n      "detailContent": "备忘录的具体内容，可以包含换行符\\\\n，内容要符合该角色的人设和日常生活。"\n    }\n  ]`);
+    }
+
+    if (selectedApps.includes('shop')) {
+        prompt += `3. Shopping (商城/外卖):\n商品内容应该符合该角色的消费习惯、兴趣爱好、经济水平，或者可能包含准备买给 ${userName} 的礼物。\n【重要新增要求】：这个 APP 不仅可以买实物商品，还可以点外卖！请在生成的首页推荐、购物车、最近订单中，**务必混合包含一些外卖/餐饮相关的条目**（例如：奶茶、烧烤、炸鸡、咖啡、轻食等）。外卖订单的状态可以是“派送中”、“已送达”等。\n【重要要求】：对于每一个商品或外卖，你必须同时生成一段详细的 "description" (商品详情)。\n这段详情需要包含：\n1. 商品的卖点、材质、口味、功能介绍（符合商城或外卖平台的语气）。\n2. 买家秀评价（可以编造几个有趣的评价）。\n3. 【最重要】：以 ${char.name} 的内心独白形式，写一段为什么想买这个东西的想法（比如：觉得很适合 ${userName} 想买来送礼，或者是自己最近刚好需要，或者是半夜饿了想吃宵夜）。\n\n`;
+        structureParts.push(`  "shop": {\n    "home": [\n      {\n        "title": "商品名称", \n        "price": "199.00", \n        "imageDesc": "图片画面的详细文字描述",\n        "desc": "商品本身的卖点、材质、功能介绍等客观描述，可以使用 \\\\n 进行换行分段。",\n        "reviews": [\n          {"user": "买家A", "content": "评价内容..."}\n        ],\n        "thought": "角色想买这个东西的内心独白"\n      }\n    ],\n    "cart": [\n      {\n        "title": "商品名称", \n        "sku": "颜色/尺码等规格", \n        "price": "99.00", \n        "qty": 1, \n        "imageDesc": "图片画面的详细文字描述",\n        "desc": "商品本身的卖点、材质、功能介绍等客观描述，可以使用 \\\\n 进行换行分段。",\n        "reviews": [\n          {"user": "买家A", "content": "评价内容..."}\n        ],\n        "thought": "角色想买这个东西的内心独白"\n      }\n    ],\n    "orders": [\n      {\n        "title": "商品名称", \n        "status": "待发货/待收货/已完成", \n        "price": "299.00", \n        "imageDesc": "图片画面的详细文字描述",\n        "desc": "商品本身的卖点、材质、功能介绍等客观描述，可以使用 \\\\n 进行换行分段。",\n        "reviews": [\n          {"user": "买家A", "content": "评价内容..."}\n        ],\n        "thought": "角色想买这个东西的内心独白"\n      }\n    ]\n  }`);
+    }
+
+    if (selectedApps.includes('gallery')) {
+        prompt += `4. Gallery (相册与录音):\n内容应该非常私密、真实，可以包含你对 ${userName} 的偷拍、合照、或者是你自己的日常照片；录音可以是你的随手记、唱歌、或者是想对 ${userName} 说的话。\n\n`;
+        structureParts.push(`  "gallery": {\n    "recentMemories": [\n      {\n        "time": "照片时间(如: Today)",\n        "desc": "照片画面的详细文字描述，例如：一张在咖啡馆偷拍 ${userName} 侧脸的照片"\n      }\n    ],\n    "albums": [\n      {\n        "title": "相册名称(如: Favorites, 偷拍的某人)",\n        "time": "相册创建或最新更新时间(如: 2023-10-25)",\n        "coverDesc": "相册封面的详细文字描述"\n      }\n    ],\n    "records": [\n      {\n        "title": "录音标题(如: 睡前想说的话, 随便哼的歌)",\n        "time": "录音时间(如: Today, 9:00 AM 或 Yesterday, 8:30 PM)",\n        "duration": "录音时长(如: 00:03:45)",\n        "size": "文件大小(如: 2.4 MB)",\n        "content": "录音的具体文本内容，比如角色的自言自语、哼唱的歌词等，要符合人设，字数在20-50字左右。"\n      }\n    ]\n  }`);
+    }
+
+    if (selectedApps.includes('browser')) {
+        prompt += `5. Browser (浏览器):\n内容应该符合你的性格、职业、当前的烦恼，或者可能包含你为了 ${userName} 而去搜索的内容（比如查攻略、查礼物、查情感问题等）。\n注意：history 生成 4-6 条，tabs 生成 3-5 条。\n\n`;
+        structureParts.push(`  "browser": {\n    "history": [\n      {\n        "keyword": "搜索关键词(如: 附近好吃的火锅店)",\n        "thought": "你搜索这个词时的内心真实想法(如: 听说这家店不错，下次带${userName}去吃看看)"\n      }\n    ],\n    "tabs": [\n      {\n        "title": "帖子标题(如: 如何向喜欢的人自然地搭话 - 情感问答)",\n        "content": "楼主的详细提问内容或帖子正文，可以包含换行符\\\\n",\n        "comments": [\n          {"user": "网友A", "text": "直接上啊！"},\n          {"user": "网友B", "text": "先从共同话题聊起吧。"}\n        ]\n      }\n    ]\n  }`);
+    }
+
+    if (selectedApps.includes('icity')) {
+        prompt += `6. icity (私密日记):\n日记的内容应该非常私密、真实，反映你此刻最真实的内心活动、情绪波动，或者对 ${userName} 的看法、纠结、暗恋等。\n语气要符合你的人设，不要像机器生成的，要像一个活人在深夜写下的碎碎念。\n字数必须在100字以上，禁止少于100字。\n\n`;
+        structureParts.push(`  "icity": {\n    "content": "日记的具体内容，可以包含换行符\\\\n，字数必须在100字以上，禁止少于100字",\n    "time": "写下这篇日记的时间，格式如：2025-11-14 21:52"\n  }`);
+    }
+
+    if (selectedApps.includes('doubao')) {
+        prompt += `7. 豆豆Ai (AI助手合集):\n包含三个 AI 助手的对话，每个助手生成 4-15 条对话（一问一答）。\n注意：在这些对话中，你是提问者(role: "user")，AI 是回答者(role: "ai")。你的提问内容应该围绕你最近的烦恼、对 ${userName} 的看法、或者符合你人设的奇怪问题。\n【三个 AI 助手的人设要求】：\n1. 豆豆 (doudou)：很热心并且言听计从并且非常支持char但是很愚蠢，笨笨的，非常不靠谱，总会出馊主意，出错了或者被骂了喜欢说“对不起，我错了，这次我一定给你最直白，最清晰，最完整最不绕弯子的答案”类似这样的道歉话语（注意不可以完全照搬这个道歉话语，可以根据场景改成符合场景的道歉话语）。\n2. 塔罗师 (tarot)：神秘、神神叨叨，喜欢用塔罗牌的意象（如愚者、恋人、高塔等）来解读你的情感或生活问题，给出模棱两可但听起来很厉害的建议，但其实依旧不靠谱\n3. 答案之书 (answer)：极其简短、高冷、玄学。每次只回答一两个词或一句话（如“去做吧”、“不要犹豫”、“时机未到”），还是不靠谱。\n\n`;
+        structureParts.push(`  "doubao": {\n    "doubao": [\n      {"role": "user", "content": "你的提问"},\n      {"role": "ai", "content": "豆豆的愚蠢回答"}\n    ],\n    "tarot": [\n      {"role": "user", "content": "你的提问"},\n      {"role": "ai", "content": "塔罗师的神秘回答"}\n    ],\n    "answer": [\n      {"role": "user", "content": "你的提问"},\n      {"role": "ai", "content": "答案之书的简短回答"}\n    ]\n  }`);
+    }
+
+    jsonStructure += structureParts.join(",\n") + "\n}";
+    prompt += `必须返回合法的 JSON 对象，结构必须严格如下：\n${jsonStructure}`;
+
+    showToast('正在一键生成选定数据(耗时较长，请耐心等待)...', 'loading');
 
     try {
         const response = await fetch(`${apiConfig.url.replace(/\/$/, '')}/chat/completions`, {
@@ -2403,15 +2430,15 @@ async function generateAllPhoneDataAPI() {
             
             const parsed = JSON.parse(replyRaw);
             
-            // 分发数据到各个 APP 的存储中
-            if (parsed.tiktok) ChatDB.setItem(`tiktok_data_${currentChatRoomCharId}`, JSON.stringify(parsed.tiktok));
-            if (parsed.notes) ChatDB.setItem(`phone_notes_${currentChatRoomCharId}`, JSON.stringify(parsed.notes));
-            if (parsed.shop) ChatDB.setItem(`phone_shop_${currentChatRoomCharId}`, JSON.stringify(parsed.shop));
-            if (parsed.gallery) ChatDB.setItem(`phone_gallery_${currentChatRoomCharId}`, JSON.stringify(parsed.gallery));
-            if (parsed.icity) ChatDB.setItem(`phone_icity_${currentChatRoomCharId}`, JSON.stringify(parsed.icity));
-            if (parsed.doubao) ChatDB.setItem(`phone_doubao_${currentChatRoomCharId}`, JSON.stringify(parsed.doubao));
+            // 分发数据到各个 APP 的存储中 (只保存选中的)
+            if (selectedApps.includes('tiktok') && parsed.tiktok) ChatDB.setItem(`tiktok_data_${currentChatRoomCharId}`, JSON.stringify(parsed.tiktok));
+            if (selectedApps.includes('notes') && parsed.notes) ChatDB.setItem(`phone_notes_${currentChatRoomCharId}`, JSON.stringify(parsed.notes));
+            if (selectedApps.includes('shop') && parsed.shop) ChatDB.setItem(`phone_shop_${currentChatRoomCharId}`, JSON.stringify(parsed.shop));
+            if (selectedApps.includes('gallery') && parsed.gallery) ChatDB.setItem(`phone_gallery_${currentChatRoomCharId}`, JSON.stringify(parsed.gallery));
+            if (selectedApps.includes('icity') && parsed.icity) ChatDB.setItem(`phone_icity_${currentChatRoomCharId}`, JSON.stringify(parsed.icity));
+            if (selectedApps.includes('doubao') && parsed.doubao) ChatDB.setItem(`phone_doubao_${currentChatRoomCharId}`, JSON.stringify(parsed.doubao));
             
-            if (parsed.browser) {
+            if (selectedApps.includes('browser') && parsed.browser) {
                 if (parsed.browser.history) ChatDB.setItem(`browser_history_${currentChatRoomCharId}`, JSON.stringify(parsed.browser.history));
                 if (parsed.browser.tabs) {
                     const tabs = parsed.browser.tabs.map((item, index) => ({
@@ -2426,7 +2453,7 @@ async function generateAllPhoneDataAPI() {
             }
             
             hideToast();
-            alert('所有 APP 数据一键生成成功！');
+            alert('选定 APP 数据一键生成成功！');
         } else {
             throw new Error('API 请求失败');
         }

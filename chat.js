@@ -4930,7 +4930,7 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
     if (activeWbs.before.length > 0) systemPrompt += `${activeWbs.before.join('\n')}\n`;
     
     systemPrompt += `<char_settings>\n`;
-    systemPrompt += `1. 你的名字：${charName}。我的网名：${userName}，我的真名：${userRealName}。\n`;
+    systemPrompt += `1. 你的名字：${charName}。我的网名是：【${userName}】，我的真实名字是：【${userRealName}】。请务必严格区分我的【网名】和【真实名字】，绝对不能搞混！\n`;
     systemPrompt += `2. 你的设定：${char.description || "一个真实的聊天伙伴。"}\n`;
     if (char.scenario) systemPrompt += `3. 当前场景：${char.scenario}\n`;
     if (activeWbs.after.length > 0) systemPrompt += `${activeWbs.after.join('\n')}\n`;
@@ -6627,7 +6627,22 @@ function openPaymentPanel(amount, title = '确认付款', callback = null) {
     }
     
     // 检查我收到的亲属卡 (对方赠送给我的)
-    const familyCard = JSON.parse(ChatDB.getItem(`family_card_received_${currentLoginId}_${currentChatRoomCharId}`) || 'null');
+    let familyCard = null;
+    let charsList = JSON.parse(ChatDB.getItem('chat_chars') || '[]');
+    let accountsList = JSON.parse(ChatDB.getItem('chat_accounts') || '[]');
+    let npcsList = JSON.parse(ChatDB.getItem('chat_npcs') || '[]');
+    let allEntities = [...charsList, ...accountsList, ...npcsList];
+    
+    for (let entity of allEntities) {
+        let cardStr = ChatDB.getItem(`family_card_received_${currentLoginId}_${entity.id}`);
+        if (cardStr) {
+            let card = JSON.parse(cardStr);
+            if (card && card.limit >= parseFloat(amount)) {
+                familyCard = card;
+                break;
+            }
+        }
+    }
     
     const methodTextEl = document.getElementById('paymentMethodText');
     if (familyCard && familyCard.limit >= parseFloat(amount)) {
@@ -6650,7 +6665,24 @@ function closePaymentPanel() {
 
 function togglePaymentMethod() {
     const currentLoginId = ChatDB.getItem('current_login_account');
-    const familyCard = JSON.parse(ChatDB.getItem(`family_card_received_${currentLoginId}_${currentChatRoomCharId}`) || 'null');
+    
+    let familyCard = null;
+    let charsList = JSON.parse(ChatDB.getItem('chat_chars') || '[]');
+    let accountsList = JSON.parse(ChatDB.getItem('chat_accounts') || '[]');
+    let npcsList = JSON.parse(ChatDB.getItem('chat_npcs') || '[]');
+    let allEntities = [...charsList, ...accountsList, ...npcsList];
+    
+    for (let entity of allEntities) {
+        let cardStr = ChatDB.getItem(`family_card_received_${currentLoginId}_${entity.id}`);
+        if (cardStr) {
+            let card = JSON.parse(cardStr);
+            if (card && card.limit >= parseFloat(typeof pendingTransferAmount !== 'undefined' ? pendingTransferAmount : 0)) {
+                familyCard = card;
+                break;
+            }
+        }
+    }
+
     const methodTextEl = document.getElementById('paymentMethodText');
 
     if (currentPaymentMethod === 'wallet') {
@@ -6727,14 +6759,30 @@ function executePayment(isFreePay = false) {
             }
             addWalletRecord(currentLoginId, 'out', globalPaymentTitle, parseFloat(pendingTransferAmount));
         } else if (currentPaymentMethod === 'family_card') {
-            let familyCard = JSON.parse(ChatDB.getItem(`family_card_received_${currentLoginId}_${currentChatRoomCharId}`) || 'null');
-            if (!familyCard || familyCard.limit < parseFloat(pendingTransferAmount)) {
+            let paid = false;
+            let charsList = JSON.parse(ChatDB.getItem('chat_chars') || '[]');
+            let accountsList = JSON.parse(ChatDB.getItem('chat_accounts') || '[]');
+            let npcsList = JSON.parse(ChatDB.getItem('chat_npcs') || '[]');
+            let allEntities = [...charsList, ...accountsList, ...npcsList];
+            
+            for (let entity of allEntities) {
+                let key = `family_card_received_${currentLoginId}_${entity.id}`;
+                let cardStr = ChatDB.getItem(key);
+                if (cardStr) {
+                    let card = JSON.parse(cardStr);
+                    if (card && card.limit >= parseFloat(pendingTransferAmount)) {
+                        card.limit -= parseFloat(pendingTransferAmount);
+                        ChatDB.setItem(key, JSON.stringify(card));
+                        paid = true;
+                        break;
+                    }
+                }
+            }
+            if (!paid) {
                 document.getElementById('payPasswordInput').value = '';
                 updatePasswordDots(0);
                 return alert('亲属卡额度不足！');
             }
-            familyCard.limit -= parseFloat(pendingTransferAmount);
-            ChatDB.setItem(`family_card_received_${currentLoginId}_${currentChatRoomCharId}`, JSON.stringify(familyCard));
         }
         
         closePaymentPanel();
@@ -8690,6 +8738,13 @@ async function generateCharSocialChatAPI() {
     const apiConfig = JSON.parse(ChatDB.getItem('current_api_config') || '{}');
     if (!apiConfig.url || !apiConfig.key || !apiConfig.model) return alert('请先配置 API！');
 
+    let accounts = JSON.parse(ChatDB.getItem('chat_accounts') || '[]');
+    const account = accounts.find(a => a.id === currentLoginId);
+    let personas = JSON.parse(ChatDB.getItem('chat_personas') || '[]');
+    const persona = personas.find(p => p.id === (account ? account.personaId : null));
+    const userName = account ? (account.netName || 'User') : 'User';
+    const userRealName = persona ? (persona.realName || userName) : userName;
+
     // 获取世界书
     let activeWbs = [];
     let wbData = JSON.parse(ChatDB.getItem('worldbook_data')) || { entries: [] };
@@ -8709,6 +8764,7 @@ async function generateCharSocialChatAPI() {
 
     let prompt = `你现在正在扮演角色：${char.name}。\n`;
     prompt += `【你的设定】：${char.description || '无'}\n`;
+    prompt += `【用户身份】：用户的网名是：【${userName}】，真实名字是：【${userRealName}】。请严格区分网名和真名。\n`;
     if (activeWbs.length > 0) {
         prompt += `【世界书背景】：\n${activeWbs.join('\n')}\n`;
     }
