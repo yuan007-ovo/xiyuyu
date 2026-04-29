@@ -5397,6 +5397,94 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
                     } else {
                         continue;
                     }
+                } else if (msgObj.type === 'family_card_gift') {
+                    newMsg.type = 'family_card'; 
+                    newMsg.subType = 'gift';
+                    newMsg.limit = msgObj.limit || '1000.00';
+                    newMsg.status = 'pending'; 
+                    newMsg.content = '[赠送亲属卡]';
+                    let updatedHistory = JSON.parse(ChatDB.getItem(`chat_history_${currentLoginId}_${targetCharId}`) || '[]');
+                    for (let j = updatedHistory.length - 1; j >= 0; j--) {
+                        if (updatedHistory[j].role === 'user' && updatedHistory[j].type === 'family_card' && updatedHistory[j].subType === 'request' && updatedHistory[j].status === 'pending') {
+                            updatedHistory[j].status = 'received'; 
+                            break;
+                        }
+                    }
+                    ChatDB.setItem(`chat_history_${currentLoginId}_${targetCharId}`, JSON.stringify(updatedHistory));
+                } else if (msgObj.type === 'family_card_request') {
+                    newMsg.type = 'family_card'; 
+                    newMsg.subType = 'request';
+                    newMsg.status = 'pending'; 
+                    newMsg.content = '[索要亲属卡]';
+                } else if (msgObj.type === 'family_card_action') {
+                    let updatedHistory = JSON.parse(ChatDB.getItem(`chat_history_${currentLoginId}_${targetCharId}`) || '[]');
+                    for (let j = updatedHistory.length - 1; j >= 0; j--) {
+                        if (updatedHistory[j].role === 'user' && updatedHistory[j].type === 'family_card' && updatedHistory[j].status === 'pending') {
+                            updatedHistory[j].status = msgObj.action === 'rejected' ? 'rejected' : 'received';
+                            if (updatedHistory[j].subType === 'gift' && updatedHistory[j].status === 'received') {
+                                ChatDB.setItem(`family_card_gifted_${currentLoginId}_${targetCharId}`, JSON.stringify({ limit: parseFloat(updatedHistory[j].limit) }));
+                            }
+                            break;
+                        }
+                    }
+                    ChatDB.setItem(`chat_history_${currentLoginId}_${targetCharId}`, JSON.stringify(updatedHistory));
+                    if (msgObj.content) {
+                        newMsg.content = msgObj.content;
+                    } else {
+                        continue;
+                    }
+                } else if (msgObj.type === 'music_invite_action') {
+                    let updatedHistory = JSON.parse(ChatDB.getItem(`chat_history_${currentLoginId}_${targetCharId}`) || '[]');
+                    for (let j = updatedHistory.length - 1; j >= 0; j--) {
+                        if (updatedHistory[j].role === 'user' && updatedHistory[j].type === 'music_invite' && updatedHistory[j].status === 'pending') {
+                            updatedHistory[j].status = msgObj.action === 'accept' ? 'accepted' : 'rejected';
+                            if (msgObj.action === 'accept') {
+                                setTimeout(() => {
+                                    if (typeof window.startListenTogether === 'function') window.startListenTogether(targetCharId);
+                                }, 500);
+                            }
+                            break;
+                        }
+                    }
+                    ChatDB.setItem(`chat_history_${currentLoginId}_${targetCharId}`, JSON.stringify(updatedHistory));
+                    if (msgObj.content) {
+                        newMsg.content = msgObj.content;
+                    } else {
+                        continue;
+                    }
+                } else if (msgObj.type === 'music_invite_proactive') {
+                    newMsg.type = 'music_invite_proactive_dummy'; 
+                    newMsg.content = msgObj.content || '[发起听歌邀请]';
+                    
+                    let songToPlay = null;
+                    let charPls = JSON.parse(ChatDB.getItem(`music_playlists_${targetCharId}`) || '[]');
+                    if (charPls.length > 0 && charPls[0].tracks && charPls[0].tracks.length > 0) {
+                        let tracks = charPls[0].tracks;
+                        songToPlay = tracks[Math.floor(Math.random() * tracks.length)];
+                    } else {
+                        let userPls = JSON.parse(ChatDB.getItem(`music_playlists_${currentLoginId}`) || '[]');
+                        if (userPls.length > 0 && userPls[0].tracks && userPls[0].tracks.length > 0) {
+                            let tracks = userPls[0].tracks;
+                            songToPlay = tracks[Math.floor(Math.random() * tracks.length)];
+                        }
+                    }
+                    window.pendingInviteSong = songToPlay;
+                    
+                    setTimeout(() => {
+                        let chars = JSON.parse(ChatDB.getItem('chat_chars') || '[]');
+                        const char = chars.find(c => c.id === targetCharId);
+                        let accounts = JSON.parse(ChatDB.getItem('chat_accounts') || '[]');
+                        const me = accounts.find(a => a.id === currentLoginId);
+                        
+                        if (char) {
+                            document.getElementById('inviteModalCharAvatar').style.backgroundImage = `url('${char.avatarUrl || ''}')`;
+                            document.getElementById('inviteModalCharName').innerText = char.netName || char.name;
+                            document.getElementById('inviteModalUserAvatar').style.backgroundImage = `url('${me ? me.avatarUrl : ''}')`;
+                            
+                            window.currentListenTogetherCharId = targetCharId;
+                            document.getElementById('musicInviteModalOverlay').classList.add('show');
+                        }
+                    }, 1000);
                 } else {
                     newMsg.content = msgObj.content;
                     if (!newMsg.content) continue; 
@@ -6707,6 +6795,9 @@ generateApiReply = async function(isProactive = false, proactiveCharId = null) {
             let bodyObj = JSON.parse(options.body);
             let sysMsg = bodyObj.messages.find(m => m.role === 'system');
             if (sysMsg) {
+                // 核心修复：严厉警告 AI 必须把指令放在 messages 数组里
+                sysMsg.content += `\n⚠️【极其重要的指令规范】：以下所有特殊互动卡片（亲属卡、听歌、商城），必须作为独立的对象，放在 JSON 的 "messages" 数组内部！绝对不能放在最外层！\n`;
+                
                 // 注入亲属卡规则
                 sysMsg.content += `\n【亲属卡互动规则】\n`;
                 sysMsg.content += `1. 主动赠送亲属卡: {"type":"family_card_gift", "limit":"额度(纯数字)"}\n`;
@@ -6914,109 +7005,6 @@ generateApiReply = async function(isProactive = false, proactiveCharId = null) {
 
     await _originalGenerateApiReply(isProactive, proactiveCharId);
     window.fetch = originalFetch;
-    
-    let newHistory = JSON.parse(ChatDB.getItem(`chat_history_${currentLoginId}_${targetCharId}`) || '[]');
-    let modified = false;
-    
-    newHistory.forEach(msg => {
-        if (msg.role === 'char' && msg.content && msg.content.includes('"type":"family_card_gift"')) {
-            try {
-                let parsed = JSON.parse(msg.content);
-                msg.type = 'family_card'; msg.subType = 'gift';
-                msg.limit = parsed.limit || '1000.00';
-                msg.status = 'pending'; msg.content = '[赠送亲属卡]';
-                modified = true;
-                for (let j = newHistory.length - 1; j >= 0; j--) {
-                    if (newHistory[j].role === 'user' && newHistory[j].type === 'family_card' && newHistory[j].subType === 'request' && newHistory[j].status === 'pending') {
-                        newHistory[j].status = 'received'; break;
-                    }
-                }
-            } catch(e){}
-        } else if (msg.role === 'char' && msg.content && msg.content.includes('"type":"family_card_request"')) {
-            try {
-                msg.type = 'family_card'; msg.subType = 'request';
-                msg.status = 'pending'; msg.content = '[索要亲属卡]';
-                modified = true;
-            } catch(e){}
-        } else if (msg.role === 'char' && msg.content && msg.content.includes('"type":"family_card_action"')) {
-            try {
-                let parsed = JSON.parse(msg.content);
-                for (let j = newHistory.length - 1; j >= 0; j--) {
-                    if (newHistory[j].role === 'user' && newHistory[j].type === 'family_card' && newHistory[j].status === 'pending') {
-                        newHistory[j].status = parsed.action === 'rejected' ? 'rejected' : 'received';
-                        if (newHistory[j].subType === 'gift' && newHistory[j].status === 'received') {
-                            ChatDB.setItem(`family_card_gifted_${currentLoginId}_${targetCharId}`, JSON.stringify({ limit: parseFloat(newHistory[j].limit) }));
-                        }
-                        modified = true; break;
-                    }
-                }
-                msg.content = parsed.content || '';
-            } catch(e){}
-        } else if (msg.role === 'char' && msg.content && msg.content.includes('"type":"music_invite_action"')) {
-            try {
-                let parsed = JSON.parse(msg.content);
-                for (let j = newHistory.length - 1; j >= 0; j--) {
-                    if (newHistory[j].role === 'user' && newHistory[j].type === 'music_invite' && newHistory[j].status === 'pending') {
-                        newHistory[j].status = parsed.action === 'accept' ? 'accepted' : 'rejected';
-                        modified = true;
-                        if (parsed.action === 'accept') {
-                            setTimeout(() => {
-                                if (typeof window.startListenTogether === 'function') window.startListenTogether(targetCharId);
-                            }, 500);
-                        }
-                        break;
-                    }
-                }
-                msg.content = parsed.content || '';
-            } catch(e){}
-        } else if (msg.role === 'char' && msg.content && msg.content.includes('"type":"music_invite_proactive"')) {
-            try {
-                let parsed = JSON.parse(msg.content);
-                msg.content = parsed.content || '';
-                
-                // 【新增】：选歌逻辑
-                let songToPlay = null;
-                // 1. 优先找 Char 的专属歌单
-                let charPls = JSON.parse(ChatDB.getItem(`music_playlists_${targetCharId}`) || '[]');
-                if (charPls.length > 0 && charPls[0].tracks && charPls[0].tracks.length > 0) {
-                    let tracks = charPls[0].tracks;
-                    songToPlay = tracks[Math.floor(Math.random() * tracks.length)];
-                } else {
-                    // 2. 如果没有，找 User 的歌单
-                    let userPls = JSON.parse(ChatDB.getItem(`music_playlists_${currentLoginId}`) || '[]');
-                    if (userPls.length > 0 && userPls[0].tracks && userPls[0].tracks.length > 0) {
-                        let tracks = userPls[0].tracks;
-                        songToPlay = tracks[Math.floor(Math.random() * tracks.length)];
-                    }
-                }
-                // 存入全局变量，等待用户同意后播放
-                window.pendingInviteSong = songToPlay;
-                
-                setTimeout(() => {
-                    let chars = JSON.parse(ChatDB.getItem('chat_chars') || '[]');
-                    const char = chars.find(c => c.id === targetCharId);
-                    let accounts = JSON.parse(ChatDB.getItem('chat_accounts') || '[]');
-                    const me = accounts.find(a => a.id === currentLoginId);
-                    
-                    if (char) {
-                        document.getElementById('inviteModalCharAvatar').style.backgroundImage = `url('${char.avatarUrl || ''}')`;
-                        document.getElementById('inviteModalCharName').innerText = char.netName || char.name;
-                        document.getElementById('inviteModalUserAvatar').style.backgroundImage = `url('${me ? me.avatarUrl : ''}')`;
-                        
-                        window.currentListenTogetherCharId = targetCharId;
-                        document.getElementById('musicInviteModalOverlay').classList.add('show');
-                    }
-                }, 1000);
-            } catch(e){}
-        }
-    });
-    
-    if (modified) {
-        ChatDB.setItem(`chat_history_${currentLoginId}_${targetCharId}`, JSON.stringify(newHistory));
-        if (targetCharId === currentChatRoomCharId) {
-            renderChatHistory(currentChatRoomCharId);
-        }
-    }
 };
 
 // ==========================================
