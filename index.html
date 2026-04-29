@@ -5420,20 +5420,27 @@ async function handleAppResetPwd() {
     }
 }
 
-// 8. Discord 登录逻辑
+// 8. Discord 登录逻辑 (终极防 404 迷路版)
 async function handleAppDiscordLogin() {
     try {
         if (!supabaseClient) throw new Error('网络连接失败，无法连接到验证服务器！\n请检查网络或尝试开启/关闭加速器后刷新页面。');
+        
+        // 获取当前页面的绝对纯净地址 (例如 https://yuan007-ovo.github.io/xiyuyu/)
+        const currentUrl = window.location.origin + window.location.pathname;
+        
         const { data, error } = await supabaseClient.auth.signInWithOAuth({ 
             provider: 'discord',
-            options: { scopes: 'identify email guilds' }
+            options: { 
+                scopes: 'identify email guilds',
+                // 【关键修复】：强行指定重定向地址，绝对不让它迷路！
+                redirectTo: currentUrl
+            }
         });
         if (error) throw new Error(error.message);
     } catch (err) {
         alert('Discord 登录失败: ' + err.message);
     }
 }
-
 // 9. 页面加载时检查 Discord Session，并验证是否在指定服务器内
 document.addEventListener('DOMContentLoaded', () => {
     if (supabaseClient) {
