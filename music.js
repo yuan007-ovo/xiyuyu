@@ -9,7 +9,7 @@ const musicLoginPanel = document.getElementById('musicLoginPanel');
 const audioPlayer = new Audio();
 // 自动播放下一首
 audioPlayer.addEventListener('ended', () => {
-    playNextMusicSong();
+    playNextMusicSong(true); // 传入 true 表示自动切歌
 });
 
 let currentPlayingSong = null;
@@ -2259,6 +2259,9 @@ ${existingSongs}
 window.currentPlaylistTracks = [];
 
 function renderMpPlaylist() {
+    // 保存当前播放列表到本地，防止退出后台/刷新后丢失
+    localStorage.setItem('music_current_playlist', JSON.stringify(window.currentPlaylistTracks || []));
+    
     const contentEl = document.getElementById('mpPlaylistContent');
     if (!contentEl) return;
     
@@ -2409,7 +2412,7 @@ function showMusicLiveMessage(role, text) {
 }
 
 // 3. 上一首 / 下一首 逻辑
-function playNextMusicSong() {
+function playNextMusicSong(isAuto = false) {
     if (!window.currentPlaylistTracks || window.currentPlaylistTracks.length === 0) return alert("当前播放列表为空");
     if (!currentPlayingSong) return;
     
@@ -2424,7 +2427,11 @@ function playNextMusicSong() {
     
     // 新增：写入系统消息
     if (window.currentListenTogetherCharId) {
-        addMusicSystemMessage(`我 切到了下一首`);
+        if (isAuto) {
+            addMusicSystemMessage(`自动切换到了下一首`);
+        } else {
+            addMusicSystemMessage(`我 切到了下一首`);
+        }
     }
 }
 
@@ -2650,8 +2657,14 @@ function triggerMusicChatAI() {
 let isCapsuleVisible = false;
 let isMiniPlayerExpanded = false;
 
-// 页面加载时读取胶囊状态
+// 页面加载时读取胶囊状态与播放列表
 window.addEventListener('DOMContentLoaded', () => {
+    // 恢复播放列表
+    const savedPlaylist = localStorage.getItem('music_current_playlist');
+    if (savedPlaylist) {
+        try { window.currentPlaylistTracks = JSON.parse(savedPlaylist); } catch(e){}
+    }
+    
     const savedState = localStorage.getItem('music_capsule_visible');
     const container = document.getElementById('globalMusicCapsuleContainer');
     if (savedState === 'true' && container) {

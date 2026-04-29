@@ -402,6 +402,13 @@
                 </div>
                 <div class="app-name" id="name-app-dock1" style="display: none;">Chars</div>
             </div>
+            <!-- 新增：Call APP -->
+            <div class="app-item" onclick="openCallAppPanel()">
+                <div class="app-icon" id="icon-app-dock-call" style="border-radius: 18px;">
+                    <svg viewBox="0 0 24 24" width="28" height="28"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                </div>
+                <div class="app-name" id="name-app-dock-call" style="display: none;">Call</div>
+            </div>
         </div>
     </div>
 
@@ -5236,6 +5243,340 @@
             <div style="text-align: center; font-size: 12px; color: #888; margin-top: 15px;">* 凭此小票可查看订单详情 *</div>
         </div>
     </div>
+    <!-- =========================================
+         新增：Call APP 全屏面板
+         ========================================= -->
+    <div class="theme-panel instant-panel" id="callAppPanel" style="z-index: 150; background-color: #f4f4f5; padding: 0;">
+        <!-- Theme Studio 风格顶栏 -->
+        <div class="panel-header">
+            <div class="header-close" onclick="closeCallAppPanel()">BACK</div>
+            <div class="header-title-wrapper">
+                <div class="header-title" id="callHeaderTitle">Recents</div>
+            </div>
+            <div class="header-close" style="visibility: hidden;">DONE</div>
+        </div>
+
+        <div class="call-page-container">
+            
+            <!-- 1. 最近通话 -->
+            <div class="call-tab-page active" id="call-page-recents">
+                <div class="call-search-bar">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" placeholder="搜索联系人">
+                </div>
+                
+                <div style="padding: 0 20px; font-size: 13px; color: #888; font-weight: bold; margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>全部通话 <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align: middle;"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
+                    <span onclick="clearCallHistory()" style="color: #ff3b30; cursor: pointer;">清空</span>
+                </div>
+
+                <div class="call-list-container" id="callRecentsList">
+                    <!-- 动态渲染通话记录 -->
+                </div>
+
+                <!-- 悬浮拨号按钮 (FAB) -->
+                <div class="call-fab-btn" onclick="openCallKeypad()">
+                    <svg viewBox="0 0 24 24"><path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z"/></svg>
+                </div>
+            </div>
+
+            <!-- 2. 通讯录 -->
+            <div class="call-tab-page" id="call-page-contacts">
+                <div class="call-search-bar">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" placeholder="搜索联系人">
+                </div>
+                <div class="call-list-container" id="callContactsList">
+                    <!-- 动态渲染通讯录 -->
+                </div>
+            </div>
+
+            <!-- 3. 营业厅 (Service) -->
+            <div class="call-tab-page call-service-page" id="call-page-service">
+                <!-- 账号信息 -->
+                <div class="call-service-user-card">
+                    <div class="call-service-avatar" id="callServiceAvatar"></div>
+                    <div class="call-service-user-info">
+                        <div class="call-service-user-name" id="callServiceName">未登录</div>
+                        <div class="call-service-user-phone" id="callServicePhone">--</div>
+                    </div>
+                    <div class="call-switch-account-btn" onclick="openCallAccountModal()">切换账号</div>
+                </div>
+
+                <!-- 余额卡片 -->
+                <div class="call-balance-card">
+                    <div class="call-balance-title">当前话费余额 (元)</div>
+                    <div class="call-balance-amount"><span>¥</span><span id="callServiceBalance">0.00</span></div>
+                </div>
+
+                <!-- 充值区 -->
+                <div class="call-recharge-section-title">充话费</div>
+                <div class="call-recharge-grid">
+                    <div class="call-recharge-item" onclick="callRecharge(30)">
+                        <div class="call-recharge-price">30元</div>
+                        <div class="call-recharge-desc">售价 29.9</div>
+                    </div>
+                    <div class="call-recharge-item" onclick="callRecharge(50)">
+                        <div class="call-recharge-price">50元</div>
+                        <div class="call-recharge-desc">售价 49.8</div>
+                    </div>
+                    <div class="call-recharge-item" onclick="callRecharge(100)">
+                        <div class="call-recharge-price">100元</div>
+                        <div class="call-recharge-desc">售价 99.5</div>
+                    </div>
+                    <div class="call-recharge-item" onclick="callRecharge(200)">
+                        <div class="call-recharge-price">200元</div>
+                        <div class="call-recharge-desc">售价 199.0</div>
+                    </div>
+                    <div class="call-recharge-item custom" onclick="callCustomRecharge()">
+                        <div class="call-recharge-price" style="color: #888;">自定义</div>
+                        <div class="call-recharge-desc">输入金额</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航 -->
+        <div class="call-bottom-nav">
+            <div class="call-nav-item active" id="call-nav-recents" onclick="switchCallTab('recents')">
+                <svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
+                <span>通话</span>
+            </div>
+            <div class="call-nav-item" id="call-nav-contacts" onclick="switchCallTab('contacts')">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                <span>联系人</span>
+            </div>
+            <div class="call-nav-item" id="call-nav-service" onclick="switchCallTab('service')">
+                <svg viewBox="0 0 24 24"><path d="M20 4H4v2h16V4zm1 3H3l-1 5v2h1v6h10v-6h4v6h2v-6h1v-2l-1-5zM5 18v-4h6v4H5z"/></svg>
+                <span>营业厅</span>
+            </div>
+        </div>
+
+        <!-- 从下向上弹出的拨号盘 (Modal) -->
+        <div class="call-keypad-overlay" id="callKeypadOverlay" onclick="closeCallKeypad()">
+            <div class="call-keypad-modal" id="callKeypadModal" onclick="event.stopPropagation()">
+                <div class="call-keypad-display">
+                    <span id="callDialNumber"></span>
+                    <div class="call-keypad-delete" id="callBtnDelete" onclick="callDeleteNumber()">
+                        <svg viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm-3 12.59L16.59 18 13 14.41 9.41 18 8 16.59 11.59 13 8 9.41 9.41 8 13 11.59 16.59 8 18 9.41 14.41 13 18 16.59z"/></svg>
+                    </div>
+                </div>
+                
+                <div class="call-keypad-grid">
+                    <div class="call-key-btn" onclick="callInputNumber('1')"><div class="call-key-num">1</div><div class="call-key-letters"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style="margin-top:2px;"><path d="M12 14c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0-6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 7c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm-6 4c.22-.72 3.31-2 6-2 2.7 0 5.8 1.29 6 2H6z"/></svg></div></div>
+                    <div class="call-key-btn" onclick="callInputNumber('2')"><div class="call-key-num">2</div><div class="call-key-letters">A B C</div></div>
+                    <div class="call-key-btn" onclick="callInputNumber('3')"><div class="call-key-num">3</div><div class="call-key-letters">D E F</div></div>
+                    <div class="call-key-btn" onclick="callInputNumber('4')"><div class="call-key-num">4</div><div class="call-key-letters">G H I</div></div>
+                    <div class="call-key-btn" onclick="callInputNumber('5')"><div class="call-key-num">5</div><div class="call-key-letters">J K L</div></div>
+                    <div class="call-key-btn" onclick="callInputNumber('6')"><div class="call-key-num">6</div><div class="call-key-letters">M N O</div></div>
+                    <div class="call-key-btn" onclick="callInputNumber('7')"><div class="call-key-num">7</div><div class="call-key-letters">P Q R S</div></div>
+                    <div class="call-key-btn" onclick="callInputNumber('8')"><div class="call-key-num">8</div><div class="call-key-letters">T U V</div></div>
+                    <div class="call-key-btn" onclick="callInputNumber('9')"><div class="call-key-num">9</div><div class="call-key-letters">W X Y Z</div></div>
+                    <div class="call-key-btn" onclick="callInputNumber('*')"><div class="call-key-num">*</div><div class="call-key-letters">&nbsp;</div></div>
+                    <div class="call-key-btn" onclick="callInputNumber('0')"><div class="call-key-num">0</div><div class="call-key-letters">+</div></div>
+                    <div class="call-key-btn" onclick="callInputNumber('#')"><div class="call-key-num">#</div><div class="call-key-letters">&nbsp;</div></div>
+                </div>
+
+                <div class="call-keypad-bottom">
+                    <div class="call-side-icon-btn" onclick="alert('菜单')">
+                        <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+                    </div>
+                    <div class="call-dial-btn" onclick="callExecuteDial()">
+                        <svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
+                    </div>
+                    <div class="call-side-icon-btn" onclick="closeCallKeypad()">
+                        <svg viewBox="0 0 24 24"><path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 切换账号弹窗 -->
+        <div class="call-account-modal-overlay" id="callAccountModalOverlay" onclick="closeCallAccountModal()">
+            <div class="call-account-modal" onclick="event.stopPropagation()">
+                <div class="call-account-modal-header">
+                    <div class="call-account-modal-title">选择账号</div>
+                    <div class="call-account-modal-close" onclick="closeCallAccountModal()">×</div>
+                </div>
+                <div class="call-account-list" id="callAccountList">
+                    <!-- JS 动态渲染 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 联系人主页 (从右侧滑入) -->
+        <div class="call-contact-page" id="callContactPage">
+            <div class="panel-header" style="background: transparent; border-bottom: none;">
+                <div class="header-close" onclick="closeCallContactDetail()">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </div>
+                <div class="header-title-wrapper">
+                    <div class="header-title" style="box-shadow: none; background: transparent; font-size: 16px; color: #111;">联系人</div>
+                </div>
+                <div class="header-close" style="visibility: hidden;">DONE</div>
+            </div>
+
+            <div class="call-contact-content">
+                <div class="call-contact-avatar" id="callContactAvatar"></div>
+                <div class="call-contact-name" id="callContactName">Name</div>
+                <div class="call-contact-number" id="callContactNumber">Number</div>
+
+                <div class="call-contact-actions">
+                    <div class="call-contact-action-btn" onclick="alert('跳转到发消息')">
+                        <div class="call-contact-action-icon"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></div>
+                        <span>信息</span>
+                    </div>
+                    <div class="call-contact-action-btn" onclick="callStartCallFromContact()">
+                        <div class="call-contact-action-icon" style="background: #4cd964; color: #fff; border: none;"><svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg></div>
+                        <span>语音</span>
+                    </div>
+                    <div class="call-contact-action-btn" onclick="alert('发起视频通话')">
+                        <div class="call-contact-action-icon"><svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg></div>
+                        <span>视频</span>
+                    </div>
+                </div>
+
+                <div class="call-contact-history-card">
+                    <div class="call-contact-history-title">通话记录</div>
+                    <div class="call-contact-history-list" id="callContactHistoryList">
+                        <!-- 动态渲染该联系人的通话记录 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 通话记录详情页 (Call Detail) -->
+        <div class="call-detail-page" id="callDetailPage">
+            <div class="panel-header" style="background: transparent; border-bottom: none;">
+                <div class="header-close" onclick="closeCallDetail()">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </div>
+                <div class="header-title-wrapper">
+                    <div class="header-title" style="box-shadow: none; background: transparent; font-size: 16px; color: #111;">通话详情</div>
+                </div>
+                <div class="header-close" style="visibility: hidden;">DONE</div>
+            </div>
+
+            <div class="call-detail-content">
+                <div class="call-detail-avatar" id="callDetailAvatar"></div>
+                <div class="call-detail-name" id="callDetailName">Name</div>
+                <div class="call-detail-time" id="callDetailTime">昨天 18:30</div>
+
+                <div class="call-detail-card">
+                    <div class="call-detail-row">
+                        <span class="call-detail-label">通话类型</span>
+                        <span class="call-detail-value" id="callDetailType">呼出通话</span>
+                    </div>
+                    <div class="call-detail-row">
+                        <span class="call-detail-label">通话时长</span>
+                        <span class="call-detail-value" id="callDetailDuration">00:00</span>
+                    </div>
+                    
+                    <div class="call-detail-content-box">
+                        <div class="call-detail-content-title">通话内容记录</div>
+                        <div class="call-detail-content-text" id="callDetailContentText">
+                            <!-- 动态渲染通话内容 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 通话中全屏界面 (文字模拟语音) -->
+        <div class="call-calling-screen" id="callCallingScreen">
+            <!-- 顶部操作栏 -->
+            <div class="call-calling-top-bar">
+                <div class="call-mini-window-btn" onclick="toggleCallMiniWindow(true)">
+                    <!-- 向内缩小的箭头 SVG -->
+                    <svg viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>
+                </div>
+                <div style="width: 36px;"></div> <!-- 占位平衡 -->
+            </div>
+            
+            <!-- 居中头像与状态区 -->
+            <div class="call-calling-profile">
+                <!-- 状态和时长移到头像上方 -->
+                <div class="call-calling-status" id="callCallingStatusText">正在呼叫...</div>
+                
+                <div class="call-calling-avatar-wrap">
+                    <div class="call-avatar-ripple" id="callAvatarRipple"></div>
+                    <div class="call-calling-avatar" id="callCallingTargetAvatar"></div>
+                </div>
+                <div class="call-calling-name" id="callCallingTargetName">未知号码</div>
+                
+                <!-- 对方正在说话状态 -->
+                <div class="call-calling-status-wrap" id="callCallingStatusWrap">
+                    <div class="call-calling-status-text">对方正在说话...</div>
+                    <div class="call-status-wave">
+                        <div class="call-wave-bar"></div><div class="call-wave-bar"></div><div class="call-wave-bar"></div><div class="call-wave-bar"></div><div class="call-wave-bar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="call-transcript-area" id="callTranscriptArea">
+                <!-- 动态渲染文字对话 -->
+            </div>
+
+            <div class="call-bottom-controls">
+                <!-- 呼叫中状态：只显示挂断按钮 -->
+                <div class="call-end-row" id="callDialingControls">
+                    <div class="call-end-call-btn" onclick="callEndCall()">
+                        <svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
+                    </div>
+                </div>
+
+                <!-- 接通后状态：显示输入框和挂断按钮 -->
+                <div id="callActiveControls" style="display: none; flex-direction: column; gap: 25px; width: 100%;">
+                    <div class="call-input-row">
+                        <div class="call-ai-btn" onclick="generateCallApiReply()">
+                            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"></path></svg>
+                        </div>
+                        <input type="text" id="callChatInput" placeholder="输入语音内容..." onkeypress="if(event.key==='Enter') sendCallMessage()">
+                        <div class="call-send-btn" onclick="sendCallMessage()">Send</div>
+                    </div>
+                    <div class="call-end-row">
+                        <div class="call-end-call-btn" onclick="callEndCall()">
+                            <svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新增：来电接听界面 (Char 主动打给 User) -->
+        <div class="call-incoming-screen" id="callIncomingScreen">
+            <div class="call-incoming-top">
+                <div class="call-incoming-avatar" id="callIncomingAvatar"></div>
+                <div class="call-incoming-name" id="callIncomingName">Name</div>
+                <div class="call-incoming-status">邀请你进行语音通话...</div>
+            </div>
+            <div class="call-incoming-bottom">
+                <div class="call-incoming-btn-wrap" onclick="rejectIncomingCall()">
+                    <div class="call-incoming-btn reject">
+                        <svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
+                    </div>
+                    <span>拒绝</span>
+                </div>
+                <div class="call-incoming-btn-wrap" onclick="acceptIncomingCall()">
+                    <div class="call-incoming-btn accept">
+                        <svg viewBox="0 0 24 24" style="transform: rotate(-135deg);"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
+                    </div>
+                    <span>接听</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 悬浮小窗 (增加 id 方便拖拽) -->
+        <div class="call-mini-window" id="callMiniWindow">
+            <div class="call-mini-avatar" id="callMiniAvatar"></div>
+            <div class="call-mini-info">
+                <div class="call-mini-status">
+                    <svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
+                    通话中
+                </div>
+                <div class="call-mini-time" id="callMiniTime">00:00</div>
+            </div>
+        </div>
 
     <!-- 隐藏的上传输入框 -->
     <input type="file" id="wallpaperUploadInput" accept="image/*" style="display: none;" onchange="handleWallpaperUpload(event)">
@@ -5266,6 +5607,7 @@
 <script src="music.js"></script>
 <script src="phoneCheck.js"></script>
 <script src="mall.js"></script>
+<script src="call.js"></script>
 <!-- 引入 Supabase 核心库 -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <!-- 引入独立的激活码验证逻辑 -->
