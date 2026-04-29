@@ -1158,12 +1158,12 @@ window.startListenTogether = function(charId) {
             miniAvatars.style.display = 'flex';
         }
 
-        // 切换全屏播放器中间的黑胶唱片为双头像
+        // 切换全屏播放器中间的黑胶唱片为双头像 (已取消，保留唱片)
         const normalDisc = document.getElementById('mpNormalDisc');
         const togetherAvatars = document.getElementById('mpTogetherAvatars');
         if (normalDisc && togetherAvatars) {
-            normalDisc.style.display = 'none';
-            togetherAvatars.style.display = 'flex';
+            // normalDisc.style.display = 'none';
+            // togetherAvatars.style.display = 'flex';
         }
         
         // 如果没有传入 startTime，说明是新开始的
@@ -1264,12 +1264,12 @@ function endListenTogether(e) {
             miniAvatars.style.display = 'none';
         }
 
-        // 恢复全屏播放器中间的黑胶唱片
+        // 恢复全屏播放器中间的黑胶唱片 (已取消，保留唱片)
         const normalDisc = document.getElementById('mpNormalDisc');
         const togetherAvatars = document.getElementById('mpTogetherAvatars');
         if (normalDisc && togetherAvatars) {
-            normalDisc.style.display = 'flex';
-            togetherAvatars.style.display = 'none';
+            // normalDisc.style.display = 'flex';
+            // togetherAvatars.style.display = 'none';
         }
         
         updateCapsuleUI(); // 刷新悬浮胶囊恢复单封面
@@ -2635,7 +2635,13 @@ function sendMusicChatMessage() {
     if (document.getElementById('chatRoomPanel') && document.getElementById('chatRoomPanel').style.display === 'flex' && typeof currentChatRoomCharId !== 'undefined' && currentChatRoomCharId === charId) {
         if (typeof renderChatHistory === 'function') renderChatHistory(charId);
     }
+    // 已移除自动触发 AI 的逻辑，交由左侧按钮手动触发
+}
 
+// 新增：音乐聊天室专属 AI 触发函数
+function triggerMusicChatAI() {
+    const charId = window.currentListenTogetherCharId;
+    if (!charId) return alert("请先开始一起听歌！");
     if (typeof generateApiReply === 'function') {
         generateApiReply(false, charId);
     }

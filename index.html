@@ -3830,12 +3830,16 @@
             <div class="chat-room-history" id="musicChatHistory" style="flex: 1; padding: 20px 15px;">
                 <!-- 动态渲染聊天记录 -->
             </div>
-            <div class="chat-room-bottom-bar" style="background: transparent; border-top: 1px solid rgba(255,255,255,0.1);">
-                <div class="cr-input-container" style="background: rgba(255,255,255,0.1);">
-                    <input type="text" id="musicChatInput" placeholder="发送消息..." style="color: #fff;" onkeypress="if(event.key==='Enter') sendMusicChatMessage()">
-                </div>
-                <div class="cr-api-btn" onclick="sendMusicChatMessage()" style="background: #ff3b30;">
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#fff" stroke-width="2.5" fill="none"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            <div class="chat-room-bottom-bar" style="background: transparent; border-top: none; justify-content: center; padding-bottom: 20px;">
+                <div style="width: 90%; max-width: 350px; background: rgba(30,30,30,0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 24px; padding: 8px 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px;">
+                    <!-- AI 气泡按键 (左侧) -->
+                    <div onclick="triggerMusicChatAI()" style="width: 32px; height: 32px; border-radius: 50%; background: #fff; display: flex; justify-content: center; align-items: center; cursor: pointer; flex-shrink: 0;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="#111"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"></path></svg>
+                    </div>
+                    <!-- 输入框 -->
+                    <input type="text" id="musicChatInput" placeholder="发送消息..." style="flex: 1; background: transparent; border: none; outline: none; color: #fff; font-size: 14px;" onkeypress="if(event.key==='Enter') sendMusicChatMessage()">
+                    <!-- 发送按键 (右侧) -->
+                    <div onclick="sendMusicChatMessage()" style="background: #ff3b30; color: #fff; font-size: 13px; font-weight: bold; padding: 6px 14px; border-radius: 16px; cursor: pointer; flex-shrink: 0;">Send</div>
                 </div>
             </div>
         </div>

@@ -6640,3 +6640,9 @@ body.ios-standalone .status-bar {
 .db-msg.user .db-bubble { 
     background: #111; color: #fff; border-top-right-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
 }
+
+/* 音乐聊天室去除气泡小尾巴 */
+#musicChatHistory .cr-bubble::before,
+#musicChatHistory .cr-bubble::after {
+    display: none !important;
+}
