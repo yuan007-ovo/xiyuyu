@@ -17,8 +17,8 @@
     <!-- 优化视口配置：viewport-fit=cover 是延伸到刘海和底部的核心 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <!-- 图标配置 -->
-    <link rel="apple-touch-icon" href="https://i.postimg.cc/1RGRdT9k/IMG-20260427-175620.png">
-    <link rel="icon" type="image/jpeg" href="https://i.postimg.cc/1RGRdT9k/IMG-20260427-175620.png">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/FR5WMbcr/retouch-2026042822223086.jpg">
+    <link rel="icon" type="image/jpeg" href="https://i.postimg.cc/FR5WMbcr/retouch-2026042822223086.jpg">
         
     <!-- Web App Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -5133,42 +5133,50 @@
 <script src="phoneCheck.js"></script>
 <script src="mall.js"></script>
 
-<!-- 【终极修复】：换用 unpkg 稳定节点，并明确指定 UMD 版本，彻底解决国内网络加载失败和 undefined 问题 -->
-<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-
 <script>
 // ==========================================
-// 身份验证与防二传核心逻辑
+// 身份验证与防二传核心逻辑 (终极防断网版)
 // ==========================================
 const SUPABASE_URL = 'https://ofsvczapcsudymnijjrq.supabase.co'; 
 const SUPABASE_ANON_KEY = 'sb_publishable_IbfurTy7b2S3SnmnhDqL7Q_vFfQi9PA';
-
-// 增加网络加载检测，防止白屏报错
 let supabaseClient = null;
-if (typeof window.supabase === 'undefined') {
-    alert("⚠️ 数据库核心组件加载失败！\n请检查网络连接，或尝试开启/关闭加速器后刷新页面。");
-} else {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-}
 
-// 页面加载时立刻检查是否已登录
+// 1. 动态加载数据库组件 (使用国内极速节点 + 备用节点)
+function loadDatabase() {
+    const script = document.createElement('script');
+    script.src = 'https://fastly.jsdelivr.net/npm/@supabase/supabase-js@2'; // 国内极速节点
+    script.onload = () => {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    };
+    script.onerror = () => {
+        // 如果极速节点被墙，自动切换国际备用节点
+        const backupScript = document.createElement('script');
+        backupScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.3/supabase.min.js';
+        backupScript.onload = () => {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        };
+        document.head.appendChild(backupScript);
+    };
+    document.head.appendChild(script);
+}
+loadDatabase();
+
+// 2. 页面加载时立刻检查是否已登录
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('auth_token');
     const overlay = document.getElementById('auth-overlay');
     const mainApp = document.getElementById('iphone-container');
 
     if (token) {
-        // 如果有 token，说明登录过，隐藏登录界面，显示主程序
         overlay.style.display = 'none';
         mainApp.style.display = 'flex';
     } else {
-        // 如果没登录，隐藏主程序，强制显示登录界面
         overlay.style.display = 'flex';
         mainApp.style.display = 'none';
     }
 });
 
-// 核心算法：与 admin.html 保持绝对一致！
+// 3. 核心算法：与 admin.html 保持绝对一致！
 function generateCodeForQQ(qq) {
     const salt = "HONEY-STUDIO-V2-SECRET-20260309";
     const baseString = `${qq}#${salt}`;
@@ -5184,7 +5192,7 @@ function generateCodeForQQ(qq) {
     return `V2-${qqInfo}-${hexHash}`.substring(0, 16);
 }
 
-// 切换面板逻辑
+// 4. 切换面板逻辑
 function switchAuthTab(tab) {
     document.querySelectorAll('.auth-section').forEach(section => section.classList.remove('active'));
     if(tab === 'login') {
@@ -5194,7 +5202,7 @@ function switchAuthTab(tab) {
     }
 }
 
-// 密码小眼睛切换逻辑
+// 5. 密码小眼睛切换逻辑
 function toggleAuthPassword(inputId, iconEl) {
     const input = document.getElementById(inputId);
     if (input.type === 'password') {
@@ -5206,8 +5214,10 @@ function toggleAuthPassword(inputId, iconEl) {
     }
 }
 
-// 激活码注册逻辑
+// 6. 激活码注册逻辑
 async function handleAppBind() {
+    if (!supabaseClient) return alert("安全组件正在加载中，请稍等两秒再点击...");
+
     const qq = document.getElementById('auth-bind-qq').value.trim();
     const code = document.getElementById('auth-bind-code').value.trim();
     const pwd = document.getElementById('auth-bind-pwd').value.trim();
@@ -5242,8 +5252,10 @@ async function handleAppBind() {
     }
 }
 
-// QQ 登录逻辑
+// 7. QQ 登录逻辑
 async function handleAppLogin() {
+    if (!supabaseClient) return alert("安全组件正在加载中，请稍等两秒再点击...");
+
     const qq = document.getElementById('auth-login-qq').value.trim();
     const pwd = document.getElementById('auth-login-pwd').value.trim();
     const btn = document.getElementById('auth-btn-login');
@@ -5269,8 +5281,9 @@ async function handleAppLogin() {
     }
 }
 
-// Discord 登录逻辑
+// 8. Discord 登录逻辑
 async function handleAppDiscordLogin() {
+    if (!supabaseClient) return alert("安全组件正在加载中，请稍等两秒再点击...");
     const { data, error } = await supabaseClient.auth.signInWithOAuth({ provider: 'discord' });
     if (error) alert('Discord 登录失败: ' + error.message);
 }
