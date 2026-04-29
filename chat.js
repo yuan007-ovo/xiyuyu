@@ -5272,6 +5272,12 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
                 ChatDB.setItem(`inner_voice_history_${currentLoginId}_${targetCharId}`, JSON.stringify(ivHistory));
             }
 
+            // --- 核心修复：AI 回复了，说明它已读了用户的消息，自动清空 Char 视角的未读数 ---
+            ChatDB.setItem(`unread_${targetCharId}_${currentLoginId}`, '0');
+            if (typeof renderLinkedAccounts === 'function') renderLinkedAccounts();
+            if (typeof renderChatList === 'function') renderChatList();
+            // ---------------------------------------------------------
+
             // 8. 模拟真人打字，一条一条渲染回复气泡
             for (let i = 0; i < messagesArray.length; i++) {
                 let msgObj = messagesArray[i];
@@ -5280,6 +5286,7 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
                 if (msgObj.type === 'recall') {
                     // Char 主动撤回自己的上一条消息
                     let updatedHistory = JSON.parse(ChatDB.getItem(`chat_history_${currentLoginId}_${targetCharId}`) || '[]');
+                    let targetHistory = JSON.parse(ChatDB.getItem(`chat_history_${targetCharId}_${currentLoginId}`) || '[]');
                     for (let j = updatedHistory.length - 1; j >= 0; j--) {
                         if (updatedHistory[j].role === 'char' && updatedHistory[j].type !== 'system' && updatedHistory[j].type !== 'hidden_system') {
                             updatedHistory[j].originalContent = updatedHistory[j].content;
@@ -5288,7 +5295,16 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
                             break;
                         }
                     }
+                    for (let j = targetHistory.length - 1; j >= 0; j--) {
+                        if (targetHistory[j].role === 'user' && targetHistory[j].type !== 'system' && targetHistory[j].type !== 'hidden_system') {
+                            targetHistory[j].originalContent = targetHistory[j].content;
+                            targetHistory[j].type = 'system';
+                            targetHistory[j].content = '你撤回了一条消息';
+                            break;
+                        }
+                    }
                     ChatDB.setItem(`chat_history_${currentLoginId}_${targetCharId}`, JSON.stringify(updatedHistory));
+                    ChatDB.setItem(`chat_history_${targetCharId}_${currentLoginId}`, JSON.stringify(targetHistory));
                     renderChatHistory(targetCharId);
                     
                     // 如果有补发的话，继续走下面的流程发出来
@@ -5314,6 +5330,7 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
                     newMsg.content = '[转账]';
                 } else if (msgObj.type === 'transfer_action') {
                     let updatedHistory = JSON.parse(ChatDB.getItem(`chat_history_${currentLoginId}_${currentChatRoomCharId}`) || '[]');
+                    let targetHistory = JSON.parse(ChatDB.getItem(`chat_history_${currentChatRoomCharId}_${currentLoginId}`) || '[]');
                     for (let j = updatedHistory.length - 1; j >= 0; j--) {
                         if (updatedHistory[j].role === 'user' && updatedHistory[j].type === 'transfer' && updatedHistory[j].status === 'pending') {
                             updatedHistory[j].status = (msgObj.action === 'rejected') ? 'rejected' : 'received';
@@ -5326,7 +5343,14 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
                             break;
                         }
                     }
+                    for (let j = targetHistory.length - 1; j >= 0; j--) {
+                        if (targetHistory[j].role === 'char' && targetHistory[j].type === 'transfer' && targetHistory[j].status === 'pending') {
+                            targetHistory[j].status = (msgObj.action === 'rejected') ? 'rejected' : 'received';
+                            break;
+                        }
+                    }
                     ChatDB.setItem(`chat_history_${currentLoginId}_${currentChatRoomCharId}`, JSON.stringify(updatedHistory));
+                    ChatDB.setItem(`chat_history_${currentChatRoomCharId}_${currentLoginId}`, JSON.stringify(targetHistory));
                     renderChatHistory(currentChatRoomCharId); 
 
                     if (msgObj.content) {
@@ -5383,13 +5407,21 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
                     }
                 } else if (msgObj.type === 'mall_action') {
                     let updatedHistory = JSON.parse(ChatDB.getItem(`chat_history_${currentLoginId}_${targetCharId}`) || '[]');
+                    let targetHistory = JSON.parse(ChatDB.getItem(`chat_history_${targetCharId}_${currentLoginId}`) || '[]');
                     for (let j = updatedHistory.length - 1; j >= 0; j--) {
                         if (updatedHistory[j].role === 'user' && updatedHistory[j].subType === 'mall_pay_request' && updatedHistory[j].mallData && updatedHistory[j].mallData.status === 'pending') {
                             updatedHistory[j].mallData.status = msgObj.action === 'pay' ? 'paid' : 'rejected';
                             break;
                         }
                     }
+                    for (let j = targetHistory.length - 1; j >= 0; j--) {
+                        if (targetHistory[j].role === 'char' && targetHistory[j].subType === 'mall_pay_request' && targetHistory[j].mallData && targetHistory[j].mallData.status === 'pending') {
+                            targetHistory[j].mallData.status = msgObj.action === 'pay' ? 'paid' : 'rejected';
+                            break;
+                        }
+                    }
                     ChatDB.setItem(`chat_history_${currentLoginId}_${targetCharId}`, JSON.stringify(updatedHistory));
+                    ChatDB.setItem(`chat_history_${targetCharId}_${currentLoginId}`, JSON.stringify(targetHistory));
                     if (targetCharId === currentChatRoomCharId) renderChatHistory(currentChatRoomCharId);
                     
                     if (msgObj.content) {
@@ -5404,13 +5436,21 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
                     newMsg.status = 'pending'; 
                     newMsg.content = '[赠送亲属卡]';
                     let updatedHistory = JSON.parse(ChatDB.getItem(`chat_history_${currentLoginId}_${targetCharId}`) || '[]');
+                    let targetHistory = JSON.parse(ChatDB.getItem(`chat_history_${targetCharId}_${currentLoginId}`) || '[]');
                     for (let j = updatedHistory.length - 1; j >= 0; j--) {
                         if (updatedHistory[j].role === 'user' && updatedHistory[j].type === 'family_card' && updatedHistory[j].subType === 'request' && updatedHistory[j].status === 'pending') {
                             updatedHistory[j].status = 'received'; 
                             break;
                         }
                     }
+                    for (let j = targetHistory.length - 1; j >= 0; j--) {
+                        if (targetHistory[j].role === 'char' && targetHistory[j].type === 'family_card' && targetHistory[j].subType === 'request' && targetHistory[j].status === 'pending') {
+                            targetHistory[j].status = 'received'; 
+                            break;
+                        }
+                    }
                     ChatDB.setItem(`chat_history_${currentLoginId}_${targetCharId}`, JSON.stringify(updatedHistory));
+                    ChatDB.setItem(`chat_history_${targetCharId}_${currentLoginId}`, JSON.stringify(targetHistory));
                 } else if (msgObj.type === 'family_card_request') {
                     newMsg.type = 'family_card'; 
                     newMsg.subType = 'request';
@@ -5418,6 +5458,7 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
                     newMsg.content = '[索要亲属卡]';
                 } else if (msgObj.type === 'family_card_action') {
                     let updatedHistory = JSON.parse(ChatDB.getItem(`chat_history_${currentLoginId}_${targetCharId}`) || '[]');
+                    let targetHistory = JSON.parse(ChatDB.getItem(`chat_history_${targetCharId}_${currentLoginId}`) || '[]');
                     for (let j = updatedHistory.length - 1; j >= 0; j--) {
                         if (updatedHistory[j].role === 'user' && updatedHistory[j].type === 'family_card' && updatedHistory[j].status === 'pending') {
                             updatedHistory[j].status = msgObj.action === 'rejected' ? 'rejected' : 'received';
@@ -5427,7 +5468,14 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
                             break;
                         }
                     }
+                    for (let j = targetHistory.length - 1; j >= 0; j--) {
+                        if (targetHistory[j].role === 'char' && targetHistory[j].type === 'family_card' && targetHistory[j].status === 'pending') {
+                            targetHistory[j].status = msgObj.action === 'rejected' ? 'rejected' : 'received';
+                            break;
+                        }
+                    }
                     ChatDB.setItem(`chat_history_${currentLoginId}_${targetCharId}`, JSON.stringify(updatedHistory));
+                    ChatDB.setItem(`chat_history_${targetCharId}_${currentLoginId}`, JSON.stringify(targetHistory));
                     if (msgObj.content) {
                         newMsg.content = msgObj.content;
                     } else {
@@ -5435,6 +5483,7 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
                     }
                 } else if (msgObj.type === 'music_invite_action') {
                     let updatedHistory = JSON.parse(ChatDB.getItem(`chat_history_${currentLoginId}_${targetCharId}`) || '[]');
+                    let targetHistory = JSON.parse(ChatDB.getItem(`chat_history_${targetCharId}_${currentLoginId}`) || '[]');
                     for (let j = updatedHistory.length - 1; j >= 0; j--) {
                         if (updatedHistory[j].role === 'user' && updatedHistory[j].type === 'music_invite' && updatedHistory[j].status === 'pending') {
                             updatedHistory[j].status = msgObj.action === 'accept' ? 'accepted' : 'rejected';
@@ -5446,7 +5495,14 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
                             break;
                         }
                     }
+                    for (let j = targetHistory.length - 1; j >= 0; j--) {
+                        if (targetHistory[j].role === 'char' && targetHistory[j].type === 'music_invite' && targetHistory[j].status === 'pending') {
+                            targetHistory[j].status = msgObj.action === 'accept' ? 'accepted' : 'rejected';
+                            break;
+                        }
+                    }
                     ChatDB.setItem(`chat_history_${currentLoginId}_${targetCharId}`, JSON.stringify(updatedHistory));
+                    ChatDB.setItem(`chat_history_${targetCharId}_${currentLoginId}`, JSON.stringify(targetHistory));
                     if (msgObj.content) {
                         newMsg.content = msgObj.content;
                     } else {
@@ -5495,6 +5551,13 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
                 let updatedHistory = JSON.parse(ChatDB.getItem(`chat_history_${currentLoginId}_${targetCharId}`) || '[]');
                 updatedHistory.push(newMsg);
                 ChatDB.setItem(`chat_history_${currentLoginId}_${targetCharId}`, JSON.stringify(updatedHistory));
+                
+                // --- 核心修复：双向同步 AI 的回复给 Char 自己的视角 ---
+                let targetHistory = JSON.parse(ChatDB.getItem(`chat_history_${targetCharId}_${currentLoginId}`) || '[]');
+                let targetMsg = { ...newMsg, role: 'user' }; // 在 Char 视角里，这是自己发出的，所以 role 是 'user'
+                targetHistory.push(targetMsg);
+                ChatDB.setItem(`chat_history_${targetCharId}_${currentLoginId}`, JSON.stringify(targetHistory));
+                // ------------------------------------------------
                 
                 // 新增：更新互动数据 (AI回复)
                 updateInteractionStats(targetCharId, false);
