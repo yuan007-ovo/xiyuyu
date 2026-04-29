@@ -1751,13 +1751,14 @@ function captureFullState() {
         apps: {},
         texts: Array.from(document.querySelectorAll('[contenteditable="true"]')).map(el => el.innerText)
     };
-    for (let i = 1; i <= 6; i++) {
-        let appId = i === 5 ? 'app-dock1' : (i === 6 ? 'app-dock-music' : `app${i}`);
+    for (let i = 1; i <= 7; i++) {
+        let appId = i === 5 ? 'app-dock1' : (i === 6 ? 'app-dock-music' : (i === 7 ? 'app-mall' : `app${i}`));
         state.apps[appId] = {
             icon: document.getElementById(`icon-${appId}`).style.backgroundImage,
             name: document.getElementById(`name-${appId}`).innerText
         };
     }
+
     return state;
 }
 
@@ -1818,8 +1819,8 @@ function applyFullState(state) {
         });
     }
     
-    for (let i = 1; i <= 6; i++) {
-        let appId = i === 5 ? 'app-dock1' : (i === 6 ? 'app-dock-music' : `app${i}`);
+    for (let i = 1; i <= 7; i++) {
+        let appId = i === 5 ? 'app-dock1' : (i === 6 ? 'app-dock-music' : (i === 7 ? 'app-mall' : `app${i}`));
         const appData = state.apps[appId];
         if (appData) {
             const appIconEl = document.getElementById(`icon-${appId}`);
@@ -1896,6 +1897,7 @@ async function confirmResetDefault() {
             { id: 'app2', name: 'settings' },
             { id: 'app3', name: 'worldbook' },
             { id: 'app4', name: 'chat' },
+            { id: 'app-mall', name: 'Shopping' },
             { id: 'app-dock1', name: 'Chars' },
             { id: 'app-dock-music', name: 'Music' }
         ];

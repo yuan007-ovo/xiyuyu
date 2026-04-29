@@ -1622,9 +1622,9 @@ function renderChatList() {
         if (char.avatarUrl) {
             avatarHtml = `<div class="wechat-avatar" style="background-image: url('${char.avatarUrl}')"></div>`;
         } else {
-            const initial = displayName.charAt(0).toUpperCase();
-            const avatarClass = char.isGroup ? 'group' : 'friend';
-            avatarHtml = `<div class="ios-msg-avatar ${avatarClass}" style="width: 38px; height: 38px; font-size: 16px; margin-right: 10px;">${initial}</div>`;
+            avatarHtml = `<div class="wechat-avatar" style="background: #e5e5ea; display: flex; justify-content: center; align-items: center; margin-right: 10px;">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="#fff"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>`;
         }
 
         item.innerHTML = `
@@ -1999,7 +1999,8 @@ function renderContactCategories() {
     let finalContacts = Array.from(dynamicContacts);
 
     userGroups.forEach(groupName => {
-        const groupFriends = finalContacts.map(id => allEntities.find(c => c.id === id)).filter(c => c && (c.contactGroup || '默认分组') === groupName);
+        // 核心修改：增加 !c.isGroup 过滤条件，确保群聊不会出现在 Friends 列表中
+        const groupFriends = finalContacts.map(id => allEntities.find(c => c.id === id)).filter(c => c && !c.isGroup && (c.contactGroup || '默认分组') === groupName);
 
         const groupItem = document.createElement('div');
         groupItem.className = 'contact-group-item';
@@ -2053,8 +2054,13 @@ function renderContactCategories() {
             friendEl.style.cursor = 'pointer';
             friendEl.onclick = () => openCharProfilePanel(friend.id);
             const typeTag = friend.isAccount ? '<span style="font-size:10px; background:#eee; color:#888; padding:2px 4px; border-radius:4px; margin-left:4px;">用户</span>' : '';
+            
+            const avatarHtml = friend.avatarUrl 
+                ? `<div style="width: 40px; height: 40px; border-radius: 10px; background-image: url('${friend.avatarUrl}'); background-size: cover; background-color: #eee;"></div>`
+                : `<div style="width: 40px; height: 40px; border-radius: 10px; background: #e5e5ea; display: flex; justify-content: center; align-items: center;"><svg viewBox="0 0 24 24" width="24" height="24" fill="#fff"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>`;
+
             friendEl.innerHTML = `
-                <div style="width: 40px; height: 40px; border-radius: 10px; background-image: url('${friend.avatarUrl || ''}'); background-size: cover; background-color: #eee;"></div>
+                ${avatarHtml}
                 <div style="flex: 1; font-size: 14px; font-weight: bold; color: #333;">${friend.netName || friend.name}${typeTag}</div>
             `;
             content.appendChild(friendEl);
@@ -2097,8 +2103,13 @@ function renderContactSpecial() {
         friendEl.style.cursor = 'pointer';
         friendEl.onclick = () => openCharProfilePanel(friend.id);
         const typeTag = friend.isAccount ? '<span style="font-size:10px; background:#eee; color:#888; padding:2px 4px; border-radius:4px; margin-left:4px;">用户</span>' : '';
+        
+        const avatarHtml = friend.avatarUrl 
+            ? `<div style="width: 48px; height: 48px; border-radius: 12px; background-image: url('${friend.avatarUrl}'); background-size: cover; background-color: #eee;"></div>`
+            : `<div style="width: 48px; height: 48px; border-radius: 12px; background: #e5e5ea; display: flex; justify-content: center; align-items: center;"><svg viewBox="0 0 24 24" width="32" height="32" fill="#fff"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>`;
+
         friendEl.innerHTML = `
-            <div style="width: 48px; height: 48px; border-radius: 12px; background-image: url('${friend.avatarUrl || ''}'); background-size: cover; background-color: #eee;"></div>
+            ${avatarHtml}
             <div style="flex: 1; font-size: 16px; font-weight: bold; color: #333;">${friend.netName || friend.name}${typeTag}</div>
             <svg viewBox="0 0 24 24" width="20" height="20" fill="#111"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
         `;
@@ -2148,8 +2159,9 @@ function renderContactGroups() {
         if (group.avatarUrl) {
             avatarHtml = `<div style="width: 48px; height: 48px; border-radius: 12px; background-image: url('${group.avatarUrl}'); background-size: cover; background-position: center;"></div>`;
         } else {
-            const initial = (group.netName || group.name || '群').charAt(0).toUpperCase();
-            avatarHtml = `<div class="ios-msg-avatar group" style="width: 48px; height: 48px; font-size: 20px; border-radius: 12px;">${initial}</div>`;
+            avatarHtml = `<div style="width: 48px; height: 48px; border-radius: 12px; background: #e5e5ea; display: flex; justify-content: center; align-items: center;">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="#fff"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>`;
         }
 
         groupEl.innerHTML = `
@@ -2839,7 +2851,7 @@ async function generateAccountInfoAPI(charId) {
 4. 8-12位登录密码(password)
 5. 6位纯数字支付密码(payPassword)
 6. 微信钱包余额(walletBalance，纯数字，精确到小数点后两位，符合其经济水平)
-7. 通讯录好友及群聊(contacts，生成 15 至 50 个，包含家人、死党、同事、各种群聊等。注意：数量必须大于15个！)
+7. 通讯录好友及群聊(contacts，生成 15 至 50 个，包含家人、死党、同事和群聊等。注意：数量必须大于15个！)
 
 必须且只能返回JSON，格式如下：
 {
@@ -2930,23 +2942,7 @@ async function generateAccountInfoAPI(charId) {
             // 核心修改：分离群聊与单人好友，并修复分组刷新逻辑
             if (parsed.contacts && Array.isArray(parsed.contacts)) {
                 let currentContacts = JSON.parse(ChatDB.getItem(`contacts_${charId}`) || '[]');
-                let npcs = JSON.parse(ChatDB.getItem('chat_npcs') || '[]'); // 用于存群聊
-                
-                // 自动创建一个专属分组，避免角色库太乱
-                const newGroupName = `${char.name}的圈子`;
-                // 修复：必须同步更新全局变量 charGroups，否则 UI 不会刷新
-                if (typeof charGroups !== 'undefined') {
-                    if (!charGroups.includes(newGroupName)) {
-                        charGroups.push(newGroupName);
-                        ChatDB.setItem('chat_char_groups', JSON.stringify(charGroups));
-                    }
-                } else {
-                    let localGroups = JSON.parse(ChatDB.getItem('chat_char_groups') || '["默认分组"]');
-                    if (!localGroups.includes(newGroupName)) {
-                        localGroups.push(newGroupName);
-                        ChatDB.setItem('chat_char_groups', JSON.stringify(localGroups));
-                    }
-                }
+                let npcs = JSON.parse(ChatDB.getItem('chat_npcs') || '[]'); // 用于存群聊和单人好友
 
                 parsed.contacts.forEach((contact, idx) => {
                     // 使用时间戳+随机数+索引确保 ID 绝对唯一
@@ -2966,22 +2962,17 @@ async function generateAccountInfoAPI(charId) {
                             avatarUrl: ''
                         });
                     } else {
-                        // 单人好友存入 chat_chars，进入角色库
-                        allChars.push({
+                        // 单人好友也存入 chat_npcs，不进角色库
+                        npcs.push({
                             id: newId,
                             name: contact.name || '未命名',
                             netName: contact.name || '未命名',
-                            sex: '未知',
-                            description: `这是 ${char.name} 的通讯录好友。`,
-                            firstMessage: '你好！',
-                            scenario: '',
-                            avatarUrl: '',
-                            group: newGroupName, // 放入专属圈子
-                            wbEntries: [],
-                            account: '', 
-                            password: '',
                             signature: contact.signature || '这个人很懒，什么都没写~',
-                            isGroup: false
+                            description: `这是 ${char.name} 的通讯录好友。`,
+                            group: 'NPC',
+                            isNPC: true,
+                            isGroup: false,
+                            avatarUrl: ''
                         });
                     }
                     currentContacts.push(newId);
@@ -2989,10 +2980,6 @@ async function generateAccountInfoAPI(charId) {
                 
                 ChatDB.setItem('chat_npcs', JSON.stringify(npcs));
                 ChatDB.setItem(`contacts_${charId}`, JSON.stringify(currentContacts));
-                
-                // 刷新角色库 UI
-                if (typeof renderCharGroups === 'function') renderCharGroups();
-                if (typeof renderCharLibrary === 'function') renderCharLibrary();
             }
             
             // 统一保存所有角色数据
@@ -3002,7 +2989,7 @@ async function generateAccountInfoAPI(charId) {
             document.getElementById('secretAccount').innerText = char.account;
             document.getElementById('secretPassword').innerText = char.password;
             
-            alert(`账号及私密数据生成成功！\n已生成 ${parsed.contacts ? parsed.contacts.length : 0} 个通讯录好友/群聊。\n单人好友已存入角色库的 [${char.name}的圈子] 分组中，群聊已存入通讯录。`);
+            alert(`账号及私密数据生成成功！\n已生成 ${parsed.contacts ? parsed.contacts.length : 0} 个通讯录好友/群聊。\n所有好友和群聊已直接存入通讯录，不再加入角色库。`);
         } else {
             alert('API 调用失败，请检查配置。');
         }
@@ -3275,6 +3262,7 @@ function renderChatHistory(charId, keepScroll = false) {
         const isMusicShareMsg = safeContent.includes('music-share-card'); // 识别分享卡片
         const isSystemMsg = msg.type === 'system'; // 识别系统提示
         const isHiddenSystemMsg = msg.type === 'hidden_system'; // 识别隐藏系统提示
+        const isHtmlMsg = msg.type === 'html'; // 识别 HTML 消息
 
         if (isHiddenSystemMsg) return; // 跳过渲染，不在界面上显示
 
@@ -3301,7 +3289,6 @@ function renderChatHistory(charId, keepScroll = false) {
                 detailEl.className = 'recall-detail';
                 detailEl.style.cssText = 'display: none; margin-top: 6px; font-size: 12px; color: #888; background: #f4f4f4; padding: 8px 12px; border-radius: 8px; max-width: 80%; word-break: break-all; border: 1px dashed #ccc;';
                 
-                // 过滤掉图片标签等，只显示纯文本或提示
                 let cleanOriginal = msg.originalContent.replace(/<img[^>]*>/g, '[图片/表情包]').replace(/<[^>]+>/g, '');
                 if (msg.originalContent.includes('chat-desc-img-120')) cleanOriginal = '[图片]';
                 if (msg.originalContent.includes('cr-voice-bubble')) cleanOriginal = '[语音]';
@@ -3423,7 +3410,7 @@ function renderChatHistory(charId, keepScroll = false) {
         const bubbleHtml = `
             <div class="cr-msg-content-wrapper">
                 ${quoteHtml}
-                <div class="cr-bubble ${msg.role === 'user' ? 'cr-bubble-right' : 'cr-bubble-left'} ${isContinuous ? 'no-tail' : ''} ${isImageMsg ? 'cr-bubble-image' : ''} ${isForwardRecord ? 'cr-bubble-forward' : ''} ${isVoiceMsg ? 'cr-bubble-voice-wrap' : ''} ${isTransferMsg ? 'cr-bubble-transfer' : ''} ${isFamilyCardMsg ? 'cr-bubble-family' : ''} ${isMusicInviteMsg ? 'cr-bubble-music-invite' : ''} ${isMusicShareMsg ? 'cr-bubble-music-share' : ''}" 
+                <div class="cr-bubble ${msg.role === 'user' ? 'cr-bubble-right' : 'cr-bubble-left'} ${isContinuous ? 'no-tail' : ''} ${isImageMsg ? 'cr-bubble-image' : ''} ${isForwardRecord ? 'cr-bubble-forward' : ''} ${isVoiceMsg ? 'cr-bubble-voice-wrap' : ''} ${isTransferMsg ? 'cr-bubble-transfer' : ''} ${isFamilyCardMsg ? 'cr-bubble-family' : ''} ${isMusicInviteMsg ? 'cr-bubble-music-invite' : ''} ${isMusicShareMsg ? 'cr-bubble-music-share' : ''} ${isHtmlMsg ? 'cr-bubble-html' : ''}" 
                      oncontextmenu="return false;" 
                      ontouchstart="handleBubbleTouchStart(event, ${index})" 
                      ontouchend="handleBubbleTouchEnd()" 
@@ -5347,6 +5334,69 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
                     } else {
                         continue; 
                     }
+                } else if (msgObj.type === 'mall_gift' || msgObj.type === 'mall_request') {
+                    const isGift = msgObj.type === 'mall_gift';
+                    const msgId = 'msg_' + Date.now() + i;
+                    const price = parseFloat(msgObj.price || 0).toFixed(2);
+                    const productName = msgObj.productName || '神秘礼物';
+                    
+                    const receiptData = encodeURIComponent(JSON.stringify({
+                        msgId: msgId,
+                        type: isGift ? '礼物赠送' : '代付请求',
+                        products: [{title: productName, price: price, qty: 1}],
+                        price: price,
+                        note: '无',
+                        address: '默认收货地址',
+                        time: '立即配送',
+                        status: 'pending'
+                    }));
+                    
+                    const cardClass = isGift ? 'gift-card' : 'request-card';
+                    const headerText = isGift ? '礼物赠送' : '代付请求';
+                    
+                    newMsg.content = `
+                        <div class="mall-receipt-card ${cardClass}" onclick="showMallReceipt('${receiptData}', '${msgId}')" id="receipt_card_${msgId}">
+                            <div class="mall-receipt-header">${headerText}</div>
+                            <div class="mall-receipt-body">
+                                <div class="mall-receipt-title">${productName}</div>
+                                <div class="mall-receipt-row"><span>总价:</span><span style="color:#ff5000;font-weight:bold;">¥${price}</span></div>
+                                <div class="mall-receipt-row"><span>备注:</span><span>无</span></div>
+                            </div>
+                            <div class="mall-receipt-footer">点击查看小票详情</div>
+                        </div>
+                    `;
+                    newMsg.type = 'html';
+                    newMsg.subType = isGift ? 'mall_gift' : 'mall_pay_request';
+                    newMsg.id = msgId;
+                    newMsg.mallData = {
+                        products: [{title: productName, price: price, qty: 1}],
+                        price: price,
+                        note: '无',
+                        address: '默认收货地址',
+                        time: '立即配送',
+                        status: 'pending'
+                    };
+                    
+                    // 如果有附带的话，额外发一条文本
+                    if (msgObj.content) {
+                        messagesArray.splice(i + 1, 0, { type: 'text', content: msgObj.content });
+                    }
+                } else if (msgObj.type === 'mall_action') {
+                    let updatedHistory = JSON.parse(ChatDB.getItem(`chat_history_${currentLoginId}_${targetCharId}`) || '[]');
+                    for (let j = updatedHistory.length - 1; j >= 0; j--) {
+                        if (updatedHistory[j].role === 'user' && updatedHistory[j].subType === 'mall_pay_request' && updatedHistory[j].mallData && updatedHistory[j].mallData.status === 'pending') {
+                            updatedHistory[j].mallData.status = msgObj.action === 'pay' ? 'paid' : 'rejected';
+                            break;
+                        }
+                    }
+                    ChatDB.setItem(`chat_history_${currentLoginId}_${targetCharId}`, JSON.stringify(updatedHistory));
+                    if (targetCharId === currentChatRoomCharId) renderChatHistory(currentChatRoomCharId);
+                    
+                    if (msgObj.content) {
+                        newMsg.content = msgObj.content;
+                    } else {
+                        continue;
+                    }
                 } else {
                     newMsg.content = msgObj.content;
                     if (!newMsg.content) continue; 
@@ -6700,6 +6750,17 @@ generateApiReply = async function(isProactive = false, proactiveCharId = null) {
 
                     sysMsg.content += `支持的 action 指令: play(继续播放), pause(暂停), next(下一首), prev(上一首), play_song(点歌, target填歌名), add_song(添加歌曲到列表, target填歌名), remove_song(从列表删除, target填歌名), exit(主动退出一起听歌)。\n`;
                     sysMsg.content += `请根据用户的聊天内容和当前音乐状态，自然地进行互动或控制音乐。\n`;
+                }
+
+                // 注入商城互动规则
+                let hasPendingPayRequest = history.some(m => m.role === 'user' && m.subType === 'mall_pay_request' && m.mallData && m.mallData.status === 'pending');
+                sysMsg.content += `\n【商城互动规则】\n`;
+                sysMsg.content += `1. 主动赠送商品: {"type":"mall_gift", "productName":"商品名称", "price":"价格(纯数字)", "content":"赠送时说的话"}\n`;
+                sysMsg.content += `2. 主动请求代付: {"type":"mall_request", "productName":"商品名称", "price":"价格(纯数字)", "content":"撒娇/请求的话"}\n`;
+                sysMsg.content += `3. 同意代付: {"type":"mall_action", "action":"pay", "content":"同意时说的话"}\n`;
+                sysMsg.content += `4. 拒绝代付: {"type":"mall_action", "action":"reject", "content":"拒绝时说的话"}\n`;
+                if (hasPendingPayRequest) {
+                    sysMsg.content += `- 对方发来了一个代付请求，你可以根据人设选择同意代付(输出 {"type":"mall_action", "action":"pay"}) 或 拒绝(输出 {"type":"mall_action", "action":"reject"})！\n`;
                 }
 
                 // 注入朋友圈规则
@@ -8643,6 +8704,10 @@ function addLinkedAccount(id) {
         targetLinkedAccounts.push(currentLoginId);
         ChatDB.setItem(`linked_accounts_${id}`, JSON.stringify(targetLinkedAccounts));
     }
+
+    // 新增：自动为双方开启关联账号消息提醒开关，解决不同步问题
+    ChatDB.setItem(`linked_account_enabled_${currentLoginId}`, 'true');
+    ChatDB.setItem(`linked_account_enabled_${id}`, 'true');
 
     renderLinkedAccounts();
     if (typeof renderChatList === 'function') renderChatList();

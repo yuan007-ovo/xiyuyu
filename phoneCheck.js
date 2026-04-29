@@ -1643,6 +1643,12 @@ function browserSwitchView(viewName) {
     document.getElementById('browser-view-web').classList.remove('active');
     document.getElementById('browser-view-tabs').classList.remove('active');
 
+    // 新增：控制顶栏的显示与隐藏，只有在主页 (home) 时才显示顶栏
+    const topBar = document.querySelector('#phoneBrowserApp .browser-top-bar');
+    if (topBar) {
+        topBar.style.display = viewName === 'home' ? 'flex' : 'none';
+    }
+
     if (viewName === 'home') document.getElementById('browser-view-home').classList.add('active');
     if (viewName === 'web') document.getElementById('browser-view-web').classList.add('active');
     if (viewName === 'tabs') {
@@ -1961,6 +1967,187 @@ async function generatePhoneBrowserAPI() {
 }
 
 // ==========================================
+// 查手机 - 豆豆Ai APP 交互逻辑
+// ==========================================
+
+function openPhoneDoubao() {
+    if (!currentChatRoomCharId) return alert('请先进入聊天室！');
+    document.getElementById('phoneDoubaoApp').classList.add('show');
+    renderPhoneDoubaoList();
+}
+
+function closePhoneDoubao() {
+    document.getElementById('phoneDoubaoApp').classList.remove('show');
+}
+
+function renderPhoneDoubaoList() {
+    const listEl = document.getElementById('dbSessionList');
+    const dataStr = ChatDB.getItem(`phone_doubao_${currentChatRoomCharId}`);
+    
+    if (!dataStr) {
+        listEl.innerHTML = '<div style="text-align: center; color: #888; font-size: 13px; margin-top: 40px;">点击右上角按钮生成对话数据</div>';
+        return;
+    }
+
+    const data = JSON.parse(dataStr);
+    listEl.innerHTML = '';
+
+    const bots = [
+        { id: 'doubao', name: '豆豆Ai', icon: '🥟', color: '#007aff' },
+        { id: 'tarot', name: '塔罗师', icon: '🔮', color: '#9c27b0' },
+        { id: 'answer', name: '答案之书', icon: '📖', color: '#ff9500' }
+    ];
+
+    bots.forEach(bot => {
+        const sessionData = data[bot.id] || [];
+        const lastMsg = sessionData.length > 0 ? sessionData[sessionData.length - 1].content : '暂无对话';
+        
+        const item = document.createElement('div');
+        item.className = 'db-session-item';
+        item.onclick = () => openDoubaoChat(bot.id, bot.name, bot.icon, bot.color);
+        item.innerHTML = `
+            <div class="db-session-avatar" style="background: ${bot.color}20; color: ${bot.color};">${bot.icon}</div>
+            <div class="db-session-info">
+                <div class="db-session-name">${bot.name}</div>
+                <div class="db-session-desc">${lastMsg}</div>
+            </div>
+        `;
+        listEl.appendChild(item);
+    });
+}
+
+function openDoubaoChat(botId, botName, botIcon, botColor) {
+    document.getElementById('dbChatTitle').innerText = botName;
+    const historyEl = document.getElementById('dbChatHistory');
+    historyEl.innerHTML = '';
+
+    const dataStr = ChatDB.getItem(`phone_doubao_${currentChatRoomCharId}`);
+    if (!dataStr) return;
+    const data = JSON.parse(dataStr);
+    const sessionData = data[botId] || [];
+
+    // 获取角色头像
+    let chars = JSON.parse(ChatDB.getItem('chat_chars') || '[]');
+    const char = chars.find(c => c.id === currentChatRoomCharId);
+    const charAvatar = char && char.avatarUrl ? `url('${char.avatarUrl}')` : 'none';
+
+    sessionData.forEach(msg => {
+        const msgEl = document.createElement('div');
+        msgEl.className = `db-msg ${msg.role === 'user' ? 'user' : 'ai'}`;
+        
+        let avatarHtml = '';
+        if (msg.role === 'user') {
+            avatarHtml = `<div class="db-avatar" style="background-image: ${charAvatar};"></div>`;
+        } else {
+            avatarHtml = `<div class="db-avatar" style="background: ${botColor};">${botIcon}</div>`;
+        }
+
+        msgEl.innerHTML = `
+            ${avatarHtml}
+            <div class="db-bubble">${msg.content}</div>
+        `;
+        historyEl.appendChild(msgEl);
+    });
+
+    document.getElementById('db-page-list').classList.remove('active');
+    document.getElementById('db-page-chat').classList.add('active');
+    
+    setTimeout(() => {
+        historyEl.scrollTop = historyEl.scrollHeight;
+    }, 50);
+}
+
+function closeDoubaoChat() {
+    document.getElementById('db-page-chat').classList.remove('active');
+    document.getElementById('db-page-list').classList.add('active');
+}
+
+async function generatePhoneDoubaoAPI() {
+    if (!currentChatRoomCharId) return;
+    const apiConfig = JSON.parse(ChatDB.getItem('current_api_config') || '{}');
+    if (!apiConfig.url || !apiConfig.key || !apiConfig.model) return alert('请先配置 API！');
+
+    let chars = JSON.parse(ChatDB.getItem('chat_chars') || '[]');
+    const char = chars.find(c => c.id === currentChatRoomCharId);
+    if (!char) return;
+
+    const currentLoginId = ChatDB.getItem('current_login_account');
+    let accounts = JSON.parse(ChatDB.getItem('chat_accounts') || '[]');
+    const account = accounts.find(a => a.id === currentLoginId);
+    let personas = JSON.parse(ChatDB.getItem('chat_personas') || '[]');
+    const persona = personas.find(p => p.id === (account ? account.personaId : null));
+    const userDesc = persona ? persona.persona : '普通用户';
+    const userName = account ? (account.netName || 'User') : 'User';
+
+    let activeWbs = [];
+    let wbData = JSON.parse(ChatDB.getItem('worldbook_data')) || { entries: [] };
+    let entries = wbData.entries.filter(e => (char.wbEntries && char.wbEntries.includes(e.id)) || e.constant);
+    entries.forEach(entry => { activeWbs.push(entry.content); });
+
+    let history = JSON.parse(ChatDB.getItem(`chat_history_${currentLoginId}_${currentChatRoomCharId}`) || '[]');
+    let recentHistory = history.slice(-30).map(m => `${m.role === 'user' ? userName : char.name}: ${m.content}`).join('\n');
+
+    let prompt = `你现在正在扮演角色：${char.name}。\n`;
+    prompt += `【你的设定】：${char.description || '无'}\n`;
+    prompt += `【用户身份】：用户(${userName})在你的生活中的角色/人设是：${userDesc}。\n`;
+    if (activeWbs.length > 0) prompt += `【世界书背景】：\n${activeWbs.join('\n')}\n`;
+    if (recentHistory) prompt += `【最近的聊天记录参考】：\n${recentHistory}\n`;
+
+    prompt += `\n请基于你的人设、当前生活状态，以及我们最近的聊天上下文，生成你手机里“豆豆Ai”APP（一个AI助手合集）的聊天记录。
+包含三个 AI 助手的对话，每个助手生成 4-8 条对话（一问一答）。
+注意：在这些对话中，你是提问者(role: "user")，AI 是回答者(role: "ai")。你的提问内容应该围绕你最近的烦恼、对 ${userName} 的看法、或者符合你人设的奇怪问题。
+
+【三个 AI 助手的人设要求】：
+1. 豆豆 (doudou)：言听计从并且非常支持char但是很愚蠢，笨笨的，非常不靠谱，因为太笨总会出馊主意，出错了或者被骂了喜欢说“对不起，我错了，这次我一定给你最直白，最清晰，最完整最不绕弯子的答案”类似这样的道歉话语。
+2. 塔罗师 (tarot)：神秘、神神叨叨，喜欢用塔罗牌的意象（如愚者、恋人、高塔等）来解读你的情感或生活问题，给出模棱两可但听起来很厉害的建议，但其实依旧不靠谱
+3. 答案之书 (answer)：极其简短、高冷、玄学。每次只回答一两个词或一句话（如“去做吧”、“不要犹豫”、“时机未到”），还是不靠谱。
+
+必须返回合法的 JSON 对象，结构如下：
+{
+  "doubao": [
+    {"role": "user", "content": "你的提问"},
+    {"role": "ai", "content": "豆豆的愚蠢回答"}
+  ],
+  "tarot": [
+    {"role": "user", "content": "你的提问"},
+    {"role": "ai", "content": "塔罗师的神秘回答"}
+  ],
+  "answer": [
+    {"role": "user", "content": "你的提问"},
+    {"role": "ai", "content": "答案之书的简短回答"}
+  ]
+}`;
+
+    showToast('正在生成豆豆数据...', 'loading');
+
+    try {
+        const response = await fetch(`${apiConfig.url.replace(/\/$/, '')}/chat/completions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiConfig.key}` },
+            body: JSON.stringify({ model: apiConfig.model, messages: [{ role: 'user', content: prompt }], temperature: 0.8 })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            let replyRaw = data.choices[0].message.content.trim();
+            replyRaw = replyRaw.replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();
+            
+            const parsed = JSON.parse(replyRaw);
+            ChatDB.setItem(`phone_doubao_${currentChatRoomCharId}`, JSON.stringify(parsed));
+            
+            renderPhoneDoubaoList();
+            hideToast();
+            alert('豆豆Ai数据生成成功！');
+        } else {
+            throw new Error('API 请求失败');
+        }
+    } catch (e) {
+        hideToast();
+        alert('生成失败，请检查 API 配置或重试。');
+    }
+}
+
+// ==========================================
 // 查手机 - icity 日记 APP 交互逻辑
 // ==========================================
 function openPhoneIcity() {
@@ -2144,6 +2331,7 @@ async function generateAllPhoneDataAPI() {
 4. Gallery(相册): 2个相册，1条录音。
 5. Browser(浏览器): 3条搜索记录，1个论坛帖子。
 6. icity(私密日记): 1篇短日记。
+7. doudou(豆豆): 包含 doubao(愚蠢馊主意)、tarot(不靠谱的塔罗占卜)、answer(不靠谱的答案之书) 三个AI助手的简短对话记录(各2-3个回合)。
 
 必须返回合法的 JSON 对象，结构必须严格如下：
 {
@@ -2170,6 +2358,11 @@ async function generateAllPhoneDataAPI() {
   "icity": {
     "content": "日记内容",
     "time": "时间"
+  },
+  "doubao": {
+    "doubao": [{"role": "user", "content": "提问"}, {"role": "ai", "content": "愚蠢回答"}],
+    "tarot": [{"role": "user", "content": "提问"}, {"role": "ai", "content": "塔罗回答"}],
+    "answer": [{"role": "user", "content": "提问"}, {"role": "ai", "content": "简短回答"}]
   }
 }`;
 
@@ -2196,6 +2389,7 @@ async function generateAllPhoneDataAPI() {
             if (parsed.shop) ChatDB.setItem(`phone_shop_${currentChatRoomCharId}`, JSON.stringify(parsed.shop));
             if (parsed.gallery) ChatDB.setItem(`phone_gallery_${currentChatRoomCharId}`, JSON.stringify(parsed.gallery));
             if (parsed.icity) ChatDB.setItem(`phone_icity_${currentChatRoomCharId}`, JSON.stringify(parsed.icity));
+            if (parsed.doubao) ChatDB.setItem(`phone_doubao_${currentChatRoomCharId}`, JSON.stringify(parsed.doubao));
             
             if (parsed.browser) {
                 if (parsed.browser.history) ChatDB.setItem(`browser_history_${currentChatRoomCharId}`, JSON.stringify(parsed.browser.history));

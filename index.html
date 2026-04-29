@@ -24,9 +24,216 @@
     <link rel="manifest" href="manifest.json">
 
     <!-- 引入外部 CSS 文件 -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">    
+    <!-- 登录界面的专属样式 -->
+    <style>
+        /* 全屏登录遮罩层，层级设为最高 999999，挡住所有东西 */
+        #auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #ffffff; z-index: 999999; 
+            display: flex; justify-content: center; align-items: center; overflow: hidden;
+        }
+        
+        /* 背景装饰：大号黑白灰五角星 */
+        .bg-star { position: absolute; z-index: 0; opacity: 0.6; }
+        .bg-star-1 { top: 15%; left: 10%; width: 40px; height: 40px; fill: #f0f0f0; transform: rotate(-15deg); }
+        .bg-star-2 { top: 20%; right: 15%; width: 24px; height: 24px; fill: #e0e0e0; transform: rotate(20deg); }
+        .bg-star-3 { bottom: 15%; left: 20%; width: 30px; height: 30px; fill: #f5f5f5; transform: rotate(45deg); }
+        .bg-star-4 { bottom: 25%; right: 10%; width: 50px; height: 50px; fill: #fafafa; transform: rotate(-10deg); }
+
+        .auth-container {
+            width: 85%; max-width: 320px; 
+            display: flex; flex-direction: column; align-items: center;
+            position: relative; z-index: 10;
+        }
+
+        /* Logo 与包裹的五角星 */
+        .logo-wrapper {
+            position: relative; margin-bottom: 15px;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .auth-logo-img { 
+            width: 80px; height: 80px; border-radius: 22px; 
+            object-fit: cover; position: relative; z-index: 2; box-shadow: none; 
+        }
+        .star-deco { position: absolute; fill: #111; z-index: 1; }
+        .star-deco.s1 { width: 16px; height: 16px; top: -8px; left: -8px; transform: rotate(-15deg); }
+        .star-deco.s2 { width: 12px; height: 12px; top: 12px; right: -12px; transform: rotate(25deg); fill: #888; }
+        .star-deco.s3 { width: 18px; height: 18px; bottom: -6px; left: -12px; transform: rotate(40deg); fill: #ccc; }
+        .star-deco.s4 { width: 14px; height: 14px; bottom: 8px; right: -8px; transform: rotate(-20deg); }
+        
+        .auth-title { font-size: 20px; font-weight: 900; color: #111; margin-bottom: 35px; letter-spacing: 2px; }
+
+        /* 表单区域切换 */
+        .auth-section { width: 100%; display: none; flex-direction: column; }
+        .auth-section.active { display: flex; animation: authFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes authFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 极简输入组 */
+        .auth-input-group { margin-bottom: 16px; width: 100%; }
+        .auth-input-label { 
+            font-size: 12px; font-weight: 900; color: #111; 
+            display: flex; align-items: center; gap: 6px; margin-bottom: 6px; letter-spacing: 1px;
+        }
+        .auth-input-label svg { width: 12px; height: 12px; fill: #111; }
+        
+        .auth-input-wrapper { position: relative; width: 100%; }
+        
+        /* 方形微圆角、更扁的浅灰色输入框 */
+        .auth-input { 
+            width: 100%; background: #f7f7f7; border: 1px solid #f0f0f0; 
+            border-radius: 8px; padding: 8px 12px; font-size: 13px; 
+            color: #333; outline: none; transition: all 0.3s ease; font-weight: bold;
+        }
+        .auth-input:focus { background: #fff; border-color: #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .auth-input::placeholder { color: #ccc; font-weight: normal; font-size: 12px; }
+
+        /* 密码小眼睛图标 */
+        .auth-eye-icon {
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            width: 16px; height: 16px; stroke: #aaa; stroke-width: 2; fill: none;
+            cursor: pointer; transition: stroke 0.2s;
+        }
+        .auth-eye-icon:hover { stroke: #111; }
+
+        /* 按钮 */
+        .auth-submit-btn { 
+            width: 100%; background: #111; color: #fff; border: none; 
+            padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; 
+            cursor: pointer; margin-top: 10px; transition: all 0.2s ease; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); letter-spacing: 1px;
+        }
+        .auth-submit-btn:active { transform: scale(0.98); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); }
+        .auth-submit-btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
+
+        /* 底部切换文字 */
+        .auth-switch-text { 
+            font-size: 11px; color: #888; text-align: center; 
+            margin-top: 25px; cursor: pointer; letter-spacing: 0.5px;
+        }
+        .auth-switch-text span { color: #111; font-weight: bold; text-decoration: underline; margin-left: 4px; }
+
+        /* Discord 按钮 */
+        .auth-dc-btn { 
+            width: 100%; background: #f4f4f5; color: #111; border: none; 
+            padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; 
+            display: flex; justify-content: center; align-items: center; gap: 8px; 
+            cursor: pointer; margin-top: 15px; transition: transform 0.2s; 
+        }
+        .auth-dc-btn:active { transform: scale(0.98); background: #eaeaea; }
+        .auth-dc-btn svg { width: 16px; height: 16px; fill: #111; }
+    </style>
 </head>
 <body>
+
+    <!-- 登录拦截遮罩层 -->
+    <div id="auth-overlay">
+        <!-- 背景装饰五角星 -->
+        <svg class="bg-star bg-star-1" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+        <svg class="bg-star bg-star-2" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+        <svg class="bg-star bg-star-3" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+        <svg class="bg-star bg-star-4" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+
+        <div class="auth-container">
+            <!-- Logo 与包裹的五角星 -->
+            <div class="logo-wrapper">
+                <svg class="star-deco s1" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                <svg class="star-deco s2" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                <svg class="star-deco s3" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                <svg class="star-deco s4" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                <img src="https://i.postimg.cc/FR5WMbcr/retouch-2026042822223086.jpg" class="auth-logo-img" alt="Logo">
+            </div>
+            
+            <div class="auth-title">溪玉机</div>
+
+            <!-- 1. 登录面板 (默认显示) -->
+            <div id="auth-section-login" class="auth-section active">
+                <div class="auth-input-group">
+                    <div class="auth-input-label">
+                        <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        账号
+                    </div>
+                    <div class="auth-input-wrapper">
+                        <input type="number" class="auth-input" id="auth-login-qq" placeholder="请输入绑定的 QQ 号">
+                    </div>
+                </div>
+                <div class="auth-input-group">
+                    <div class="auth-input-label">
+                        <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        密码
+                    </div>
+                    <div class="auth-input-wrapper">
+                        <input type="password" class="auth-input" id="auth-login-pwd" placeholder="请输入密码">
+                        <svg class="auth-eye-icon" onclick="toggleAuthPassword('auth-login-pwd', this)" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                            <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                    </div>
+                </div>
+                
+                <button class="auth-submit-btn" id="auth-btn-login" onclick="handleAppLogin()">登 录</button>
+                
+                <button class="auth-dc-btn" onclick="handleAppDiscordLogin()">
+                    <svg viewBox="0 0 127.14 96.36"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.31,60,73.31,53s5-12.74,11.43-12.74S96.2,46,96.12,53,91.08,65.69,84.69,65.69Z"/></svg>
+                    Discord 授权登录
+                </button>
+
+                <div class="auth-switch-text" onclick="switchAuthTab('register')">是否需要注册账号 <span>点击进入注册面板</span></div>
+            </div>
+
+            <!-- 2. 注册面板 (默认隐藏) -->
+            <div id="auth-section-register" class="auth-section">
+                <div class="auth-input-group">
+                    <div class="auth-input-label">
+                        <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        账号
+                    </div>
+                    <div class="auth-input-wrapper">
+                        <input type="number" class="auth-input" id="auth-bind-qq" placeholder="请输入您的 QQ 号">
+                    </div>
+                </div>
+                <div class="auth-input-group">
+                    <div class="auth-input-label">
+                        <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        激活码
+                    </div>
+                    <div class="auth-input-wrapper">
+                        <input type="text" class="auth-input" id="auth-bind-code" placeholder="请输入对应的激活码">
+                    </div>
+                </div>
+                <div class="auth-input-group">
+                    <div class="auth-input-label">
+                        <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        密码
+                    </div>
+                    <div class="auth-input-wrapper">
+                        <input type="password" class="auth-input" id="auth-bind-pwd" placeholder="请设置登录密码">
+                        <svg class="auth-eye-icon" onclick="toggleAuthPassword('auth-bind-pwd', this)" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                            <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                    </div>
+                </div>
+                <div class="auth-input-group">
+                    <div class="auth-input-label">
+                        <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        确认密码
+                    </div>
+                    <div class="auth-input-wrapper">
+                        <input type="password" class="auth-input" id="auth-bind-pwd-confirm" placeholder="请再次输入密码">
+                        <svg class="auth-eye-icon" onclick="toggleAuthPassword('auth-bind-pwd-confirm', this)" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                            <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                    </div>
+                </div>
+                
+                <button class="auth-submit-btn" id="auth-btn-bind" onclick="handleAppBind()">注 册</button>
+                
+                <div class="auth-switch-text" onclick="switchAuthTab('login')">已有账号？ <span>点击返回登录</span></div>
+            </div>
+        </div>
+    </div>
 
 <div class="iphone" id="iphone-container">
     <!-- 状态栏 -->
@@ -101,6 +308,12 @@
             </div>
             <div class="app-name" id="name-app4">chat</div>
         </div>
+        <div class="app-item" id="app-mall" onclick="openMallApp()" style="grid-row: 6; grid-column: 1;">
+    <div class="app-icon" id="icon-app-mall">
+        <svg viewBox="0 0 24 24" width="28" height="28" stroke="#8e8e93" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+    </div>
+    <div class="app-name" id="name-app-mall">Shopping</div>
+</div>
     </div>
 
     <!-- 新增：Dock 底栏 -->
@@ -3563,6 +3776,18 @@
                         </div>
 
                         <!-- 第4行：3个 APP -->
+                        
+                        <!-- 新增：第5行第1列 豆包 APP -->
+                        <div class="desktop-app" style="grid-row: 4; grid-column: 1;" onclick="openPhoneDoubao()">
+                            <div class="app-icon" id="app-icon-doubao" style="background: #fff;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                                    <circle cx="9" cy="10" r="1.5" fill="#007aff"></circle>
+                                    <circle cx="15" cy="10" r="1.5" fill="#007aff"></circle>
+                                </svg>
+                            </div>
+                            <div class="app-name">豆豆Ai</div>
+                        </div>
                         <div class="desktop-app" style="grid-row: 4; grid-column: 2;" onclick="openPhoneTiktok()">
                             <div class="app-icon" id="app-icon-2"><svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"></path></svg></div>
                             <div class="app-name">TikTok</div>
@@ -4233,6 +4458,38 @@
                         </div>
                     </div>
 
+                    <!-- 新增：豆豆Ai APP 主界面 -->
+                    <div class="phone-doubao-app" id="phoneDoubaoApp">
+                        <!-- 会话列表页 -->
+                        <div class="db-page active" id="db-page-list">
+                            <div class="db-header">
+                                <div class="db-header-left" onclick="closePhoneDoubao()">
+                                    <span style="font-size: 24px; font-weight: 900; letter-spacing: 1px;">豆豆Ai</span>
+                                </div>
+                                <div class="db-header-right" onclick="generatePhoneDoubaoAPI()" title="生成对话数据">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                                </div>
+                            </div>
+                            <div class="db-list-content" id="dbSessionList">
+                                <!-- 动态渲染三个会话 -->
+                            </div>
+                        </div>
+
+                        <!-- 聊天详情页 (无输入框) -->
+                        <div class="db-page" id="db-page-chat">
+                            <div class="db-chat-header">
+                                <div class="db-chat-back" onclick="closeDoubaoChat()">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="#333" stroke-width="2" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                                </div>
+                                <div class="db-chat-title" id="dbChatTitle">豆豆Ai</div>
+                                <div style="width: 24px;"></div>
+                            </div>
+                            <div class="db-chat-history" id="dbChatHistory">
+                                <!-- 动态渲染聊天记录 -->
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -4318,6 +4575,534 @@
             </div>
         </div>
     </div>
+    <!-- Shopping APP 面板 -->
+<div class="theme-panel instant-panel" id="mallAppPanel" style="display: none; padding: 0; background: var(--bg-color);">
+    
+    <!-- 顶栏 -->
+    <div class="panel-header">
+        <div class="header-back" onclick="closeMallApp()">BACK</div>
+        <div class="header-title-wrapper">
+            <div class="header-title" id="mallHeaderTitle">Shopping</div>
+        </div>
+        <div class="header-refresh" id="mallRefreshBtn" onclick="refreshMallData()">
+            <svg viewBox="0 0 24 24"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+        </div>
+    </div>
+
+    <!-- 页面容器 -->
+    <div class="mall-main-container">
+        
+        <!-- 1. 首页 (Home) -->
+        <div class="mall-page active" id="mall-page-home">
+            <div class="mall-search-wrapper">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" placeholder="搜索商品或附近外卖...">
+            </div>
+            <div class="mall-product-grid" id="mallHomeGrid"></div>
+        </div>
+
+        <!-- 2. 店铺页 (Shops - 替代原分类页) -->
+        <div class="mall-page" id="mall-page-shops">
+            <div class="mall-search-wrapper" style="margin-top: 10px;">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" placeholder="搜索店铺...">
+            </div>
+            <div class="mall-shop-list" id="mallShopList">
+                <!-- JS 动态渲染店铺列表 -->
+            </div>
+        </div>
+
+        <!-- 3. 购物车 (Cart) -->
+        <div class="mall-page" id="mall-page-cart">
+            <div class="mall-cart-list" id="mallCartList"></div>
+            <div class="mall-checkout-bar">
+                <div class="mall-checkout-left">
+                    <div class="mall-checkbox active"></div> 全选
+                </div>
+                <div class="mall-checkout-right">
+                    <div class="mall-checkout-total">合计: <span id="mallCartTotal">¥0.00</span></div>
+                    <div class="mall-checkout-btn" onclick="mallCheckout()">去结算</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 我的 (Profile) -->
+        <div class="mall-page" id="mall-page-profile">
+            <div class="mall-profile-header">
+                <div class="mall-profile-avatar" id="mallProfileAvatar">U</div>
+                <div class="mall-profile-info">
+                    <div class="mall-profile-name" id="mallProfileName">默认用户</div>
+                    <div class="mall-profile-tag">普通会员</div>
+                </div>
+            </div>
+
+            <div class="mall-order-section">
+                <div class="mall-section-header">
+                    <div class="mall-section-title">我的订单</div>
+                    <div class="mall-section-more" onclick="openMallSubPage('orders', 'all')">全部订单 ></div>
+                </div>
+                <div class="mall-order-grid">
+                    <div class="mall-order-item" onclick="openMallSubPage('orders', 'pendingPay')">
+                        <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                        <span>待付款</span>
+                    </div>
+                    <div class="mall-order-item" onclick="openMallSubPage('orders', 'pendingShip')" id="mallOrderBtnShip">
+                        <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                        <span>待发货</span>
+                    </div>
+                    <div class="mall-order-item" onclick="openMallSubPage('orders', 'delivering')" id="mallOrderBtnDeliver">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span>配送中</span>
+                    </div>
+                    <div class="mall-order-item" onclick="openMallSubPage('orders', 'review')">
+                        <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        <span>评价</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mall-menu-list">
+                <div class="mall-menu-item" onclick="openMallSubPage('address')">
+                    <div class="mall-menu-item-left"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> 地址管理</div>
+                    <div class="mall-menu-item-right"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+                </div>
+                <div class="mall-menu-item" onclick="openMallSubPage('cs')">
+                    <div class="mall-menu-item-left"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> 联系客服</div>
+                    <div class="mall-menu-item-right"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+                </div>
+                <div class="mall-menu-item" onclick="openMallSubPage('settings')">
+                    <div class="mall-menu-item-left"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> 设置</div>
+                    <div class="mall-menu-item-right"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 固定底部导航栏 (全宽贴底) -->
+    <div class="mall-bottom-bar">
+        <div class="mall-nav-item active" onclick="switchMallTab('home', event)">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span class="mall-nav-text">首页</span>
+        </div>
+        <div class="mall-nav-item" onclick="switchMallTab('shops', event)">
+            <svg viewBox="0 0 24 24"><path d="M3 3h18v4H3z"></path><path d="M4 7v14h16V7"></path><path d="M9 11v4"></path><path d="M15 11v4"></path></svg>
+            <span class="mall-nav-text">店铺</span>
+        </div>
+        <div class="mall-nav-item" onclick="switchMallTab('cart', event)">
+            <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <span class="mall-nav-text">购物车</span>
+        </div>
+        <div class="mall-nav-item" onclick="switchMallTab('profile', event)">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span class="mall-nav-text">我的</span>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         子页面：商品详情页
+         ========================================== -->
+    <div class="mall-sub-page" id="mallSubPageDetail">
+        <div class="panel-header">
+            <div class="header-back" onclick="closeMallSubPage('mallSubPageDetail')">BACK</div>
+            <div class="header-title-wrapper"><div class="header-title">商品详情</div></div>
+            <div class="header-refresh"></div>
+        </div>
+        <div class="mall-sub-content" style="padding: 0; padding-bottom: 80px;">
+            <div class="mall-detail-img" id="mallDetailImg">[商品大图]</div>
+            <div class="mall-detail-info">
+                <div class="mall-detail-price" id="mallDetailPrice">0.00</div>
+                <div class="mall-detail-title" id="mallDetailTitle">商品名称</div>
+            </div>
+            <div class="mall-detail-desc">
+                <div class="mall-detail-desc-title">商品介绍</div>
+                <div class="mall-detail-desc-text" id="mallDetailDesc">详细描述...</div>
+            </div>
+        </div>
+        <div class="mall-detail-bottom">
+            <div class="mall-detail-icon-btn"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>收藏</div>
+            <div class="mall-detail-icon-btn" onclick="switchMallTab('cart'); closeMallSubPage('mallSubPageDetail');"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>购物车</div>
+            <div class="mall-detail-btn-group">
+                <div class="mall-detail-btn cart" onclick="mallAddToCart()">加入购物车</div>
+                <div class="mall-detail-btn buy" onclick="mallBuyNow()">立即购买</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         新增子页面：确认订单 (结算页)
+         ========================================== -->
+    <div class="mall-sub-page" id="mallSubPageCheckout" style="z-index: 160; background: #f4f4f5;">
+        <div class="panel-header">
+            <div class="header-back" onclick="closeMallSubPage('mallSubPageCheckout')">BACK</div>
+            <div class="header-title-wrapper"><div class="header-title">确认订单</div></div>
+            <div class="header-refresh"></div>
+        </div>
+        <div class="mall-sub-content" style="padding: 15px; padding-bottom: 100px;">
+            <!-- 地址选择 -->
+            <div onclick="openMallAddressSelectModal()" style="background: #fff; border-radius: 16px; padding: 20px 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); cursor: pointer;">
+                <div style="display: flex; flex-direction: column; gap: 4px; max-width: 85%;" id="mallCheckoutAddressText">
+                    <div style="font-size: 15px; font-weight: bold; color: #111;">请选择收货地址</div>
+                </div>
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#ccc" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </div>
+
+            <!-- 配送时间选择 -->
+            <div onclick="openMallTimeSelectModal()" style="background: #fff; border-radius: 16px; padding: 20px 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); cursor: pointer;">
+                <div style="font-size: 15px; font-weight: bold; color: #111;">配送时间</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span id="mallCheckoutTimeText" style="font-size: 14px; color: #ff5000; font-weight: bold;">立即配送</span>
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#ccc" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </div>
+            </div>
+            
+            <!-- 商品明细 -->
+            <div style="background: #fff; border-radius: 16px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); margin-bottom: 15px;">
+                <div style="font-size: 14px; font-weight: bold; color: #111; margin-bottom: 15px; border-bottom: 1px solid #f5f5f5; padding-bottom: 10px;">商品明细</div>
+                <div id="mallCheckoutItemList" style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- 动态渲染商品 -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部操作栏 -->
+        <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 1px solid #eee; padding: 10px 15px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 10px; z-index: 10;">
+            <div style="display: flex; gap: 10px; width: 100%;">
+                <div onclick="openMallGiftPayModal('gift')" style="flex: 1; text-align: center; padding: 10px; background: #f4f4f4; border-radius: 12px; font-size: 13px; color: #333; cursor: pointer; font-weight: bold;">赠送给好友</div>
+                <div onclick="openMallGiftPayModal('request')" style="flex: 1; text-align: center; padding: 10px; background: #f4f4f4; border-radius: 12px; font-size: 13px; color: #333; cursor: pointer; font-weight: bold;">请好友代付</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="font-size: 13px; color: #555;">合计: <span id="mallCheckoutTotal" style="font-size: 20px; font-weight: 900; color: #ff5000;">¥0.00</span></div>
+                <div onclick="openMallPaymentModal(false)" style="background: #ff5000; color: #fff; padding: 12px 30px; border-radius: 24px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(255,80,0,0.3);">提交订单</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 配送时间选择弹窗 -->
+    <div class="preset-modal-overlay" id="mallTimeSelectModalOverlay" style="z-index: 600;">
+        <div class="preset-modal" style="width: 300px; max-height: 70vh;">
+            <div class="preset-modal-title">选择配送时间</div>
+            <div id="mallTimeSelectList" style="width: 100%; overflow-y: auto; padding: 10px 20px; display: flex; flex-direction: column; gap: 10px;">
+                <!-- 动态渲染 -->
+            </div>
+            <div class="preset-modal-actions">
+                <div class="preset-btn-cancel" onclick="document.getElementById('mallTimeSelectModalOverlay').classList.remove('show')" style="width: 100%; border-right: none;">取消</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         子页面：店铺详情页
+         ========================================== -->
+    <div class="mall-sub-page" id="mallSubPageShopDetail">
+        <div class="panel-header">
+            <div class="header-back" onclick="closeMallSubPage('mallSubPageShopDetail')">BACK</div>
+            <div class="header-title-wrapper"><div class="header-title">店铺主页</div></div>
+            <div class="header-refresh"></div>
+        </div>
+        <div class="mall-sub-content" style="padding: 0;">
+            <div class="mall-shop-detail-header">
+                <div class="mall-shop-detail-logo" id="mallShopDetailLogo">Logo</div>
+                <div>
+                    <div class="mall-shop-detail-name" id="mallShopDetailName">店铺名称</div>
+                    <div class="mall-shop-detail-score" id="mallShopDetailScore">综合评分 4.9 | 粉丝 10万+</div>
+                </div>
+            </div>
+            <div class="mall-product-grid" id="mallShopDetailGrid">
+                <!-- JS 动态渲染该店铺的商品 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         子页面：订单列表页
+         ========================================== -->
+    <div class="mall-sub-page" id="mallSubPageOrders">
+        <div class="panel-header">
+            <div class="header-back" onclick="closeMallSubPage('mallSubPageOrders')">BACK</div>
+            <div class="header-title-wrapper" style="position: static; transform: none; flex: 1; display: flex; justify-content: center;">
+                <div style="font-size: 16px; font-weight: bold; color: #111; background: transparent; box-shadow: none; padding: 0;">我的订单</div>
+            </div>
+            <div class="header-refresh" style="width: 50px;"></div>
+        </div>
+        <div class="mall-order-tabs" style="padding-top: 0;">
+            <div class="mall-order-tab active" onclick="switchMallOrderTab('all', this)">全部</div>
+            <div class="mall-order-tab" onclick="switchMallOrderTab('pendingPay', this)">待付款</div>
+            <div class="mall-order-tab" onclick="switchMallOrderTab('pendingShip', this)">待发货</div>
+            <div class="mall-order-tab" onclick="switchMallOrderTab('delivering', this)">配送中</div>
+            <div class="mall-order-tab" onclick="switchMallOrderTab('review', this)">评价</div>
+        </div>
+        <div class="mall-sub-content">
+            <div class="mall-order-list" id="mallOrderList">
+                <!-- 动态渲染订单 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         子页面：地址管理
+         ========================================== -->
+    <div class="mall-sub-page" id="mallSubPageAddress">
+        <div class="panel-header">
+            <div class="header-back" onclick="closeMallSubPage('mallSubPageAddress')">BACK</div>
+            <div class="header-title-wrapper"><div class="header-title">地址管理</div></div>
+            <div class="header-refresh"></div>
+        </div>
+        <div class="mall-sub-content">
+            <div id="mallAddressList">
+                <!-- JS 动态渲染地址 -->
+            </div>
+            <div class="mall-address-add-btn" onclick="openMallAddressAddPage()">+ 新增收货地址</div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         子页面：新增地址 (全屏地图页)
+         ========================================== -->
+    <div class="mall-sub-page" id="mallSubPageAddressAdd" style="z-index: 160;">
+        <div class="panel-header">
+            <div class="header-back" onclick="closeMallSubPage('mallSubPageAddressAdd')">BACK</div>
+            <div class="header-title-wrapper"><div class="header-title">新增地址</div></div>
+            <div class="header-refresh"></div>
+        </div>
+        <div class="mall-map-area">
+            <div class="mall-map-marker">
+                <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3" fill="#fff"></circle></svg>
+                <div class="mall-map-shadow"></div>
+            </div>
+        </div>
+        <div class="mall-address-form">
+            <div class="mall-location-btns">
+                <div class="mall-loc-btn real" onclick="getRealLocation()">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg> 获取真实定位
+                </div>
+                <div class="mall-loc-btn virtual" onclick="getVirtualLocation()">
+                    <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg> 使用虚拟定位
+                </div>
+            </div>
+            <div class="mall-address-input-group">
+                <label>联系人</label>
+                <input type="text" id="mallAddrName" placeholder="名字">
+            </div>
+            <div class="mall-address-input-group">
+                <label>手机号</label>
+                <input type="tel" id="mallAddrPhone" placeholder="11位手机号" maxlength="11">
+            </div>
+            <div class="mall-address-input-group">
+                <label>详细地址</label>
+                <input type="text" id="mallAddrDetail" placeholder="小区楼栋/乡村名称">
+            </div>
+            <div class="mall-address-add-btn" onclick="saveMallAddress()" style="margin-top: auto;">保存地址</div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         子页面：联系客服
+         ========================================== -->
+    <div class="mall-sub-page" id="mallSubPageCS">
+        <div class="panel-header">
+            <div class="header-back" onclick="closeMallSubPage('mallSubPageCS')">BACK</div>
+            <div class="header-title-wrapper"><div class="header-title">联系客服</div></div>
+            <div class="header-refresh"></div>
+        </div>
+        <div class="mall-sub-content">
+            <div class="mall-cs-card">
+                <div class="mall-cs-icon"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></div>
+                <div class="mall-cs-title">在线客服</div>
+                <div class="mall-cs-desc">服务时间：09:00 - 22:00</div>
+                <div class="mall-cs-btn" onclick="alert('正在连接人工客服...')">开始咨询</div>
+            </div>
+            <div class="mall-faq-list">
+                <div class="mall-faq-item"><span>如何申请退款？</span><svg viewBox="0 0 24 24" width="16" height="16" stroke="#ccc" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+                <div class="mall-faq-item"><span>发货时间是多久？</span><svg viewBox="0 0 24 24" width="16" height="16" stroke="#ccc" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+                <div class="mall-faq-item"><span>如何修改收货地址？</span><svg viewBox="0 0 24 24" width="16" height="16" stroke="#ccc" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+            </div>
+        </div>
+    </div>
+    <!-- ==========================================
+         子页面：设置
+         ========================================== -->
+    <div class="mall-sub-page" id="mallSubPageSettings">
+        <div class="panel-header">
+            <div class="header-back" onclick="closeMallSubPage('mallSubPageSettings')">BACK</div>
+            <div class="header-title-wrapper"><div class="header-title">设置</div></div>
+            <div class="header-refresh"></div>
+        </div>
+        <div class="mall-sub-content">
+            <div class="mall-settings-group">
+                <div class="mall-settings-item" onclick="openMallWbSelectModal()">
+                    <span>商城世界书</span>
+                    <span class="mall-settings-value" id="mallWbSelectText">未选择 <svg viewBox="0 0 24 24" width="16" height="16" stroke="#ccc" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
+                </div>
+            </div>
+            <div class="mall-settings-group">
+                <div class="mall-settings-item">
+                    <span>消息通知</span>
+                    <span class="mall-settings-value">已开启 <svg viewBox="0 0 24 24" width="16" height="16" stroke="#ccc" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
+                </div>
+                <div class="mall-settings-item" onclick="alert('缓存已清理')">
+                    <span>清除缓存</span>
+                    <span class="mall-settings-value">12.5 MB <svg viewBox="0 0 24 24" width="16" height="16" stroke="#ccc" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
+                </div>
+            </div>
+            <div class="mall-settings-group">
+                <div class="mall-settings-item">
+                    <span>关于商城</span>
+                    <span class="mall-settings-value">v1.0.0 <svg viewBox="0 0 24 24" width="16" height="16" stroke="#ccc" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
+                </div>
+            </div>
+            <div style="text-align: center; color: #ff3b30; font-weight: bold; padding: 15px; background: #fff; border-radius: 16px; border: 1px solid #eee; cursor: pointer;" onclick="mallLogout()">
+                退出登录账号
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         弹窗：选择角色生成数据
+         ========================================== -->
+    <div class="mall-modal-overlay" id="mallCharSelectModal">
+        <div class="mall-modal-box">
+            <div class="mall-modal-close" onclick="closeMallCharSelectModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
+            <div class="mall-modal-title">选择角色生成商城</div>
+            <div class="mall-modal-list" id="mallCharSelectList">
+                <!-- JS 动态渲染角色列表 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         子页面：订单详情页
+         ========================================== -->
+    <div class="mall-sub-page" id="mallSubPageOrderDetail" style="z-index: 160;">
+        <div class="panel-header">
+            <div class="header-back" onclick="closeMallSubPage('mallSubPageOrderDetail')">BACK</div>
+            <div class="header-title-wrapper"><div class="header-title">订单详情</div></div>
+            <div class="header-refresh"></div>
+        </div>
+        <div class="mall-sub-content" id="mallOrderDetailContent" style="background: #f4f4f5; padding: 15px;">
+            <!-- JS 动态渲染订单详情 -->
+        </div>
+    </div>
+
+    <!-- ==========================================
+         弹窗：选择商城世界书 (折叠栏风格)
+         ========================================== -->
+    <div class="preset-modal-overlay" id="mallWbSelectModalOverlay" style="z-index: 400;">
+        <div class="preset-modal" style="width: 320px; max-height: 80vh; display: flex; flex-direction: column; border-radius: 20px; background: #fff; padding: 20px 15px;">
+            <div style="font-size: 16px; font-weight: bold; color: #555; text-align: center; margin-bottom: 15px;">绑定商城世界书</div>
+            
+            <div id="mallWbSelectList" style="flex: 1; overflow-y: auto; width: 100%; text-align: left; margin-bottom: 15px;">
+                <!-- 动态渲染分组和条目 -->
+            </div>
+            
+            <div style="width: 100%; background: #f0f0f0; color: #333; text-align: center; padding: 12px 0; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer;" onclick="confirmMallWbSelect()">确认</div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         支付密码弹窗 (精简版，仅用于输入密码)
+         ========================================== -->
+    <div class="mall-payment-overlay" id="mallPaymentModalOverlay" style="z-index: 500;">
+        <div class="mall-payment-box">
+            <div class="mall-payment-close" onclick="closeMallPaymentModal()">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </div>
+            <div class="mall-payment-title" id="mallPayTitle">请输入支付密码</div>
+            <div class="mall-payment-amount" id="mallPaymentAmountText">¥0.00</div>
+            
+            <div class="mall-payment-method" id="mallPaymentMethodBtn" onclick="toggleMallPaymentMethod()">
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                <span id="mallPaymentMethodText">钱包余额支付</span>
+            </div>
+            
+            <div class="mall-payment-pwd-container" id="mallPayPwdArea" onclick="document.getElementById('mallPayPwdInput').focus()">
+                <div class="mall-payment-pwd-dot"></div><div class="mall-payment-pwd-dot"></div><div class="mall-payment-pwd-dot"></div>
+                <div class="mall-payment-pwd-dot"></div><div class="mall-payment-pwd-dot"></div><div class="mall-payment-pwd-dot"></div>
+                <input type="password" id="mallPayPwdInput" class="mall-payment-input-hidden" maxlength="6" inputmode="numeric" oninput="handleMallPwdInput()">
+            </div>
+            
+            <div class="mall-free-pay-btn" id="mallFreePayBtn" onclick="executeMallPayment(null, true)">确认支付</div>
+        </div>
+    </div>
+
+
+    <!-- 新增：赠送/代付弹窗 -->
+    <div class="preset-modal-overlay" id="mallGiftPayModalOverlay" style="z-index: 500;">
+        <div class="preset-modal" style="width: 300px;">
+            <div class="preset-modal-title" id="mallGiftPayTitle">赠送给好友</div>
+            <input type="hidden" id="mallGiftPayType">
+            <div style="width: 100%; padding: 15px 20px; display: flex; flex-direction: column; gap: 10px;">
+                <select id="mallGiftPayCharSelect" style="width: 100%; padding: 10px; border: 1px solid #eee; border-radius: 8px; outline: none; font-size: 13px; background: #f9f9f9;">
+                    <!-- 动态渲染角色 -->
+                </select>
+                <textarea id="mallGiftPayNote" style="width: 100%; height: 60px; padding: 10px; border: 1px solid #eee; border-radius: 8px; resize: none; outline: none; font-size: 13px; background: #f9f9f9;" placeholder="输入备注留言..."></textarea>
+            </div>
+            <div class="preset-modal-actions">
+                <div class="preset-btn-cancel" onclick="document.getElementById('mallGiftPayModalOverlay').classList.remove('show')">取消</div>
+                <div class="preset-btn-confirm" onclick="confirmMallGiftPay()">确定发送</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增：地址选择弹窗 -->
+    <div class="preset-modal-overlay" id="mallAddressSelectModalOverlay" style="z-index: 600;">
+        <div class="preset-modal" style="width: 300px; max-height: 70vh;">
+            <div class="preset-modal-title">选择收货地址</div>
+            <div id="mallAddressSelectList" style="width: 100%; overflow-y: auto; padding: 10px 20px; display: flex; flex-direction: column; gap: 10px;">
+                <!-- 动态渲染 -->
+            </div>
+            <div class="preset-modal-actions">
+                <div class="preset-btn-cancel" onclick="document.getElementById('mallAddressSelectModalOverlay').classList.remove('show')" style="width: 100%; border-right: none;">取消</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 物流详情弹窗 -->
+    <div class="preset-modal-overlay" id="mallLogisticsModalOverlay" style="z-index: 600;">
+        <div class="preset-modal" style="width: 300px; padding: 20px; align-items: flex-start;">
+            <div style="font-size: 16px; font-weight: bold; margin-bottom: 15px; text-align: center; width: 100%;">物流详情</div>
+            <div style="display: flex; flex-direction: column; gap: 15px; border-left: 2px solid #ddd; padding-left: 15px; margin-left: 10px; width: 100%;" id="mallLogisticsList">
+                <!-- 动态物流 -->
+            </div>
+            <div style="width: 100%; text-align: center; margin-top: 20px; padding: 12px; background: #111; color: #fff; border-radius: 12px; cursor: pointer; font-weight: bold;" onclick="document.getElementById('mallLogisticsModalOverlay').classList.remove('show')">关闭</div>
+        </div>
+    </div>
+
+    <!-- 登录页面 (覆盖在最上层) -->
+    <div class="mall-login-page" id="mallLoginPage">
+        <div class="panel-header">
+            <div class="header-back" onclick="closeMallApp()">BACK</div>
+            <div class="header-title-wrapper">
+                <div class="header-title">选择账号</div>
+            </div>
+            <div class="header-refresh"></div>
+        </div>
+
+        <div class="panel-content" style="padding-top: 0;">
+            <div style="font-size: 13px; color: #888; text-align: center; margin: 20px 0;">
+                请选择要登录的账号以继续访问商城
+            </div>
+            <div class="mall-account-list" id="mallAccountList">
+                <!-- JS 动态渲染账号列表 -->
+            </div>
+        </div>
+    </div>
+
+</div>
+
+    <!-- 商城小票详情弹窗 (移至全局，确保在聊天室能弹出) -->
+    <div class="preset-modal-overlay" id="mallReceiptModalOverlay" style="z-index: 9999;">
+        <div class="mall-receipt-modal-box">
+            <div class="mall-receipt-modal-close" onclick="document.getElementById('mallReceiptModalOverlay').classList.remove('show')">×</div>
+            <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px dashed #111; padding-bottom: 10px;">Shopping Receipt</div>
+            <div id="mallReceiptContent" style="display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: #333;">
+                <!-- 动态内容 -->
+            </div>
+            <div style="margin-top: 20px; text-align: center; font-size: 24px; font-weight: bold;">¥<span id="mallReceiptTotal">0.00</span></div>
+            <div style="text-align: center; font-size: 12px; color: #888; margin-top: 15px;">* 凭此小票可查看订单详情 *</div>
+        </div>
+    </div>
+
     <!-- 隐藏的上传输入框 -->
     <input type="file" id="wallpaperUploadInput" accept="image/*" style="display: none;" onchange="handleWallpaperUpload(event)">
     <input type="file" id="iconUploadInput" accept="image/*" style="display: none;" onchange="handleIconUpload(event)">
@@ -4346,5 +5131,150 @@
 <script src="chat.js"></script>
 <script src="music.js"></script>
 <script src="phoneCheck.js"></script>
+<script src="mall.js"></script>
+
+<!-- 【终极修复】：换用 unpkg 稳定节点，并明确指定 UMD 版本，彻底解决国内网络加载失败和 undefined 问题 -->
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<script>
+// ==========================================
+// 身份验证与防二传核心逻辑
+// ==========================================
+const SUPABASE_URL = 'https://ofsvczapcsudymnijjrq.supabase.co'; 
+const SUPABASE_ANON_KEY = 'sb_publishable_IbfurTy7b2S3SnmnhDqL7Q_vFfQi9PA';
+
+// 增加网络加载检测，防止白屏报错
+let supabaseClient = null;
+if (typeof window.supabase === 'undefined') {
+    alert("⚠️ 数据库核心组件加载失败！\n请检查网络连接，或尝试开启/关闭加速器后刷新页面。");
+} else {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+
+// 页面加载时立刻检查是否已登录
+document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('auth_token');
+    const overlay = document.getElementById('auth-overlay');
+    const mainApp = document.getElementById('iphone-container');
+
+    if (token) {
+        // 如果有 token，说明登录过，隐藏登录界面，显示主程序
+        overlay.style.display = 'none';
+        mainApp.style.display = 'flex';
+    } else {
+        // 如果没登录，隐藏主程序，强制显示登录界面
+        overlay.style.display = 'flex';
+        mainApp.style.display = 'none';
+    }
+});
+
+// 核心算法：与 admin.html 保持绝对一致！
+function generateCodeForQQ(qq) {
+    const salt = "HONEY-STUDIO-V2-SECRET-20260309";
+    const baseString = `${qq}#${salt}`;
+    let hash = 0;
+    for (let i = 0; i < baseString.length; i++) {
+        const char = baseString.charCodeAt(i);
+        hash = ((hash << 7) - hash) + char;
+        hash |= 0; 
+    }
+    hash = Math.abs(hash);
+    const hexHash = hash.toString(16).toUpperCase();
+    const qqInfo = `${qq.length}${qq.slice(-2)}`;
+    return `V2-${qqInfo}-${hexHash}`.substring(0, 16);
+}
+
+// 切换面板逻辑
+function switchAuthTab(tab) {
+    document.querySelectorAll('.auth-section').forEach(section => section.classList.remove('active'));
+    if(tab === 'login') {
+        document.getElementById('auth-section-login').classList.add('active');
+    } else {
+        document.getElementById('auth-section-register').classList.add('active');
+    }
+}
+
+// 密码小眼睛切换逻辑
+function toggleAuthPassword(inputId, iconEl) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        iconEl.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+    } else {
+        input.type = 'password';
+        iconEl.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+    }
+}
+
+// 激活码注册逻辑
+async function handleAppBind() {
+    const qq = document.getElementById('auth-bind-qq').value.trim();
+    const code = document.getElementById('auth-bind-code').value.trim();
+    const pwd = document.getElementById('auth-bind-pwd').value.trim();
+    const pwdConfirm = document.getElementById('auth-bind-pwd-confirm').value.trim();
+    const btn = document.getElementById('auth-btn-bind');
+
+    if (!qq || !code || !pwd || !pwdConfirm) return alert('请填写完整信息！');
+    if (pwd !== pwdConfirm) return alert('两次输入的密码不一致，请重新输入！');
+
+    btn.disabled = true; btn.innerText = '验证中...';
+
+    try {
+        const expectedCode = generateCodeForQQ(qq);
+        if (code !== expectedCode) throw new Error('激活码与QQ号不匹配，或激活码无效！');
+
+        const { error } = await supabaseClient.from('vip_keys').insert([{ code: code, qq: qq, password: pwd, is_used: true }]);
+        if (error) {
+            if (error.code === '23505') throw new Error('该 QQ 号已注册，或该激活码已被使用！');
+            throw error;
+        }
+
+        alert('注册成功！请登录。');
+        switchAuthTab('login');
+        document.getElementById('auth-login-qq').value = qq;
+        document.getElementById('auth-login-pwd').value = ''; 
+        document.getElementById('auth-bind-pwd').value = ''; 
+        document.getElementById('auth-bind-pwd-confirm').value = ''; 
+    } catch (err) {
+        alert(err.message);
+    } finally {
+        btn.disabled = false; btn.innerText = '注 册';
+    }
+}
+
+// QQ 登录逻辑
+async function handleAppLogin() {
+    const qq = document.getElementById('auth-login-qq').value.trim();
+    const pwd = document.getElementById('auth-login-pwd').value.trim();
+    const btn = document.getElementById('auth-btn-login');
+
+    if (!qq || !pwd) return alert('请输入 QQ 号和密码！');
+    btn.disabled = true; btn.innerText = '登录中...';
+
+    try {
+        const { data, error } = await supabaseClient.from('vip_keys').select('*').eq('qq', qq).eq('password', pwd).single();
+        if (error || !data) throw new Error('QQ号或密码错误！');
+
+        // 登录成功，存入凭证
+        localStorage.setItem('auth_token', 'valid_user_' + qq);
+        
+        // 隐藏登录页，解锁主程序！
+        document.getElementById('auth-overlay').style.display = 'none';
+        document.getElementById('iphone-container').style.display = 'flex';
+        
+    } catch (err) {
+        alert(err.message);
+    } finally {
+        btn.disabled = false; btn.innerText = '登 录';
+    }
+}
+
+// Discord 登录逻辑
+async function handleAppDiscordLogin() {
+    const { data, error } = await supabaseClient.auth.signInWithOAuth({ provider: 'discord' });
+    if (error) alert('Discord 登录失败: ' + error.message);
+}
+</script>
+
 </body>
 </html>
