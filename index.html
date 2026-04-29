@@ -3866,7 +3866,7 @@
                         <div class="sidebar-avatar"></div>
                         <div class="sidebar-menu">
                             <!-- 新增：一键生成按键 -->
-                            <div class="sidebar-item" onclick="generateAllPhoneDataAPI()">
+                            <div class="sidebar-item" onclick="openPhoneGenerateModal()">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                                 <span style="color: #ff3b30; font-weight: bold;">一键生成</span>
                             </div>
@@ -4666,6 +4666,40 @@
         </div>
     </div>
 
+    <!-- 一键生成选择弹窗 -->
+    <div class="preset-modal-overlay" id="phoneGenerateModalOverlay" style="z-index: 10000;">
+        <div class="preset-modal" style="width: 280px;">
+            <div class="preset-modal-title">选择要生成的 APP</div>
+            <div style="width: 100%; padding: 15px 20px; display: flex; flex-direction: column; gap: 12px; text-align: left;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #333; cursor: pointer;">
+                    <input type="checkbox" class="phone-gen-checkbox" value="tiktok" checked style="width: 16px; height: 16px; accent-color: #111;"> TikTok
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #333; cursor: pointer;">
+                    <input type="checkbox" class="phone-gen-checkbox" value="notes" checked style="width: 16px; height: 16px; accent-color: #111;"> 备忘录
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #333; cursor: pointer;">
+                    <input type="checkbox" class="phone-gen-checkbox" value="shop" checked style="width: 16px; height: 16px; accent-color: #111;"> 商城
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #333; cursor: pointer;">
+                    <input type="checkbox" class="phone-gen-checkbox" value="gallery" checked style="width: 16px; height: 16px; accent-color: #111;"> 相册与录音
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #333; cursor: pointer;">
+                    <input type="checkbox" class="phone-gen-checkbox" value="browser" checked style="width: 16px; height: 16px; accent-color: #111;"> 浏览器
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #333; cursor: pointer;">
+                    <input type="checkbox" class="phone-gen-checkbox" value="icity" checked style="width: 16px; height: 16px; accent-color: #111;"> icity 日记
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #333; cursor: pointer;">
+                    <input type="checkbox" class="phone-gen-checkbox" value="doubao" checked style="width: 16px; height: 16px; accent-color: #111;"> 豆豆Ai
+                </label>
+            </div>
+            <div class="preset-modal-actions">
+                <div class="preset-btn-cancel" onclick="closePhoneGenerateModal()">取消</div>
+                <div class="preset-btn-confirm" onclick="confirmPhoneGenerate()">生成</div>
+            </div>
+        </div>
+    </div>
+
     <!-- =========================================
          新增：关联账号管理全屏面板 (仿QQ样式)
          ========================================= -->
@@ -5249,7 +5283,7 @@
     <div class="theme-panel instant-panel" id="callAppPanel" style="z-index: 150; background-color: #f4f4f5; padding: 0;">
         <!-- Theme Studio 风格顶栏 -->
         <div class="panel-header">
-            <div class="header-close" onclick="closeCallAppPanel()">BACK</div>
+            <div class="header-close" onclick="closeCallAppPanel()" style="font-size: 15px;">BACK</div>
             <div class="header-title-wrapper">
                 <div class="header-title" id="callHeaderTitle">Recents</div>
             </div>
