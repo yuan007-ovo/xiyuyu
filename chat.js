@@ -6720,10 +6720,11 @@ function updatePasswordDots(length) {
         }
     });
 }
-
 function executePayment(isFreePay = false) {
     const currentLoginId = ChatDB.getItem('current_login_account');
-    if (!currentLoginId || !currentChatRoomCharId) return;
+    if (!currentLoginId) return;
+    // 核心修复：如果有全局回调（如话费充值、商城购物），则不需要校验是否在聊天室内
+    if (!globalPaymentCallback && !currentChatRoomCharId) return;
 
     // 1. 获取当前账号信息校验支付密码 (兼容 Char)
     let allEntities = getAllEntities();
