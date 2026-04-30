@@ -25,6 +25,9 @@
 
     <!-- 引入外部 CSS 文件 -->
     <link rel="stylesheet" href="style.css">    
+    <!-- 引入 MapLibre 原生 3D 真实地图库 -->
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" />
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
     <!-- 登录界面的专属样式 -->
     <style>
         /* 全屏登录遮罩层，层级设为最高 999999，挡住所有东西 */
@@ -351,12 +354,19 @@
             </div>
         </div>
 
-        <!-- 4个 APP -->
+        <!-- 桌面 APP -->
         <div class="app-item" onclick="openThemePanel()">
             <div class="app-icon" id="icon-app1">
                 <svg viewBox="0 0 24 24" width="28" height="28"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
             </div>
             <div class="app-name" id="name-app1">theme</div>
+        </div>
+        <!-- 移到桌面的 Music APP (自然排在第五行第二个) -->
+        <div class="app-item" onclick="openMusicApp()">
+            <div class="app-icon" id="icon-app-dock-music">
+                <svg viewBox="0 0 24 24" width="28" height="28"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+            </div>
+            <div class="app-name" id="name-app-dock-music">Music</div>
         </div>
         <div class="app-item" onclick="openSettingsPanel()">
             <div class="app-icon" id="icon-app2">
@@ -376,25 +386,19 @@
             </div>
             <div class="app-name" id="name-app4">chat</div>
         </div>
-        <div class="app-item" id="app-mall" onclick="openMallApp()" style="grid-row: 6; grid-column: 1;">
-    <div class="app-icon" id="icon-app-mall">
-        <svg viewBox="0 0 24 24" width="28" height="28" stroke="#8e8e93" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-    </div>
-    <div class="app-name" id="name-app-mall">Shopping</div>
-</div>
+        <!-- 去除 style 锁定，让商城APP可以自由拖动 -->
+        <div class="app-item" id="app-mall" onclick="openMallApp()">
+            <div class="app-icon" id="icon-app-mall">
+                <svg viewBox="0 0 24 24" width="28" height="28" stroke="#8e8e93" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+            </div>
+            <div class="app-name" id="name-app-mall">Shopping</div>
+        </div>
     </div>
 
     <!-- 新增：Dock 底栏 -->
     <div class="dock-container">
         <div class="dock-bg"></div>
         <div class="dock-apps">
-            <!-- 新增：Music APP -->
-            <div class="app-item" onclick="openMusicApp()">
-                <div class="app-icon" id="icon-app-dock-music" style="border-radius: 18px;">
-                    <svg viewBox="0 0 24 24" width="28" height="28"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
-                </div>
-                <div class="app-name" id="name-app-dock-music" style="display: none;">Music</div>
-            </div>
             <!-- 原有的 Chars APP -->
             <div class="app-item" onclick="openCharLibraryPanel()">
                 <div class="app-icon" id="icon-app-dock1" style="border-radius: 18px;">
@@ -411,7 +415,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- 主题美化全屏面板 -->
     <div class="theme-panel" id="themePanel">
@@ -605,6 +608,32 @@
                         <div class="skeleton-subline"></div>
                     </div>
                     <div class="item-deco">music <svg viewBox="0 0 24 24" width="12" height="12" stroke="#d0d0d0" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
+                </div>
+                <div class="app-setting-item">
+                    <div class="app-icon-upload" data-target="icon-app-mall">
+                        <svg class="placeholder-svg" viewBox="0 0 24 24" width="24" height="24" stroke="#ccc" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        <div class="camera-badge">
+                            <svg viewBox="0 0 24 24" width="10" height="10" stroke="#666" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        </div>
+                    </div>
+                    <div class="app-input-group">
+                        <input type="text" class="app-name-input" data-target="name-app-mall" value="Shopping">
+                        <div class="skeleton-subline"></div>
+                    </div>
+                    <div class="item-deco">shopping <svg viewBox="0 0 24 24" width="12" height="12" stroke="#d0d0d0" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
+                </div>
+                <div class="app-setting-item">
+                    <div class="app-icon-upload" data-target="icon-app-dock-call">
+                        <svg class="placeholder-svg" viewBox="0 0 24 24" width="24" height="24" stroke="#ccc" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        <div class="camera-badge">
+                            <svg viewBox="0 0 24 24" width="10" height="10" stroke="#666" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        </div>
+                    </div>
+                    <div class="app-input-group">
+                        <input type="text" class="app-name-input" data-target="name-app-dock-call" value="Call">
+                        <div class="skeleton-subline"></div>
+                    </div>
+                    <div class="item-deco">call <svg viewBox="0 0 24 24" width="12" height="12" stroke="#d0d0d0" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
                 </div>
             </div>
 
@@ -2282,6 +2311,41 @@
             </div>
         </div>
     </div>
+    <!-- 发送定位弹窗 -->
+    <div class="preset-modal-overlay" id="sendLocationModalOverlay" style="z-index: 3000;">
+        <div class="preset-modal" style="width: 340px; padding: 0; overflow: hidden; position: relative;">
+            <!-- 弹窗关闭键：右上角，浅灰色圆圈 -->
+            <div onclick="closeSendLocationModal()" style="position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; background: rgba(240,240,240,0.9); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #888; font-size: 16px; font-weight: bold; z-index: 1001; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">×</div>
+            
+            <div style="padding: 15px; border-bottom: 1px solid #eee; text-align: center;">
+                <div style="font-size: 16px; font-weight: bold; color: #111;">发送位置</div>
+            </div>
+            <!-- 真实地图区域 (正视角) -->
+            <div style="width: 100%; height: 200px; position: relative; overflow: hidden; background: #e5e5ea;">
+                <div id="realMapContainer" style="width: 100%; height: 100%;"></div>
+                <!-- 中心准星 -->
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%); z-index: 1000; pointer-events: none;">
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="#ff3b30"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3" fill="#fff"></circle></svg>
+                </div>
+            </div>
+            <div style="padding: 15px; display: flex; flex-direction: column; gap: 12px;">
+                
+                <!-- 搜索定位输入框 (更宽更细长，带五角星) -->
+                <div style="display: flex; align-items: center; background: #f4f4f4; border: 1px solid #eee; border-radius: 8px; padding: 8px 12px; width: 100%;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="#aaa" style="flex-shrink: 0; margin-right: 8px;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                    <input type="text" id="chatLocationNameInput" placeholder="搜索位置 / 输入位置名称" style="flex: 1; border: none; outline: none; font-size: 14px; background: transparent; height: 20px; color: #333;" onkeypress="if(event.key==='Enter') searchChatLocation()">
+                    <div onclick="searchChatLocation()" style="font-size: 13px; color: #111; font-weight: bold; cursor: pointer; padding-left: 10px; border-left: 1px solid #ddd; margin-left: 6px;">搜索</div>
+                </div>
+                
+                <!-- 按钮行：定位到我 + 发送定位 (黑白灰，各占一半) -->
+                <div style="display: flex; gap: 10px; margin-top: 5px;">
+                    <div onclick="getChatRealLocation()" style="flex: 1; background: #f4f4f4; color: #333; text-align: center; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; border: 1px solid #eee;">定位到我</div>
+                    <div onclick="sendChatLocation()" style="flex: 1; background: #111; color: #fff; text-align: center; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">发送定位</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 隐藏的导入文件输入框 -->
     <input type="file" id="charImportInput" style="display: none;" accept=".png,.json,.txt" onchange="handleCharImportFile(event)">
     
@@ -2319,6 +2383,25 @@
             <div class="preset-modal-actions">
                 <div class="preset-btn-cancel" onclick="closeSendVoiceModal()">取消</div>
                 <div class="preset-btn-confirm" onclick="confirmSendVoice()">发送</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 定位详情查看弹窗 -->
+    <div class="preset-modal-overlay" id="locationDetailModalOverlay" style="z-index: 3000;">
+        <div class="preset-modal" style="width: 320px; padding: 0; overflow: hidden; position: relative;">
+            <div onclick="closeLocationDetail()" style="position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; background: rgba(240,240,240,0.9); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #888; font-size: 16px; font-weight: bold; z-index: 1001; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">×</div>
+            <div style="padding: 15px; border-bottom: 1px solid #eee; text-align: center;">
+                <div style="font-size: 16px; font-weight: bold; color: #111;">位置详情</div>
+            </div>
+            <div style="width: 100%; height: 300px; position: relative; background: #e5e5ea;">
+                <div id="detailMapContainer" style="width: 100%; height: 100%;"></div>
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%); z-index: 1000; pointer-events: none;">
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="#ff3b30"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3" fill="#fff"></circle></svg>
+                </div>
+            </div>
+            <div style="padding: 15px; text-align: center;">
+                <div id="locationDetailName" style="font-size: 15px; font-weight: bold; color: #333;"></div>
             </div>
         </div>
     </div>
@@ -2452,6 +2535,14 @@
                         <span class="cs-label">心声系统 (Inner Voice)</span>
                         <label class="ios-switch" style="transform: scale(0.8); transform-origin: right center; margin: 0;">
                             <input type="checkbox" id="csInnerVoiceToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="cs-journal-list-item">
+                        <span class="cs-dot">·</span>
+                        <span class="cs-label">感知天气与温度</span>
+                        <label class="ios-switch" style="transform: scale(0.8); transform-origin: right center; margin: 0;">
+                            <input type="checkbox" id="csWeatherAwareToggle">
                             <span class="slider"></span>
                         </label>
                     </div>
