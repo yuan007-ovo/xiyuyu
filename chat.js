@@ -3268,6 +3268,7 @@ function renderChatHistory(charId, keepScroll = false) {
         const isSystemMsg = msg.type === 'system'; // 识别系统提示
         const isHiddenSystemMsg = msg.type === 'hidden_system'; // 识别隐藏系统提示
         const isHtmlMsg = msg.type === 'html'; // 识别 HTML 消息
+        const isLocationMsg = safeContent.includes('wc-bubble-location-card'); // 识别定位卡片
 
         if (isHiddenSystemMsg) return; // 跳过渲染，不在界面上显示
 
@@ -3415,7 +3416,7 @@ function renderChatHistory(charId, keepScroll = false) {
         const bubbleHtml = `
             <div class="cr-msg-content-wrapper">
                 ${quoteHtml}
-                <div class="cr-bubble ${msg.role === 'user' ? 'cr-bubble-right' : 'cr-bubble-left'} ${isContinuous ? 'no-tail' : ''} ${isImageMsg ? 'cr-bubble-image' : ''} ${isForwardRecord ? 'cr-bubble-forward' : ''} ${isVoiceMsg ? 'cr-bubble-voice-wrap' : ''} ${isTransferMsg ? 'cr-bubble-transfer' : ''} ${isFamilyCardMsg ? 'cr-bubble-family' : ''} ${isMusicInviteMsg ? 'cr-bubble-music-invite' : ''} ${isMusicShareMsg ? 'cr-bubble-music-share' : ''} ${isHtmlMsg ? 'cr-bubble-html' : ''}" 
+                <div class="cr-bubble ${msg.role === 'user' ? 'cr-bubble-right' : 'cr-bubble-left'} ${isContinuous ? 'no-tail' : ''} ${isImageMsg ? 'cr-bubble-image' : ''} ${isForwardRecord ? 'cr-bubble-forward' : ''} ${isVoiceMsg ? 'cr-bubble-voice-wrap' : ''} ${isTransferMsg ? 'cr-bubble-transfer' : ''} ${isFamilyCardMsg ? 'cr-bubble-family' : ''} ${isMusicInviteMsg ? 'cr-bubble-music-invite' : ''} ${isMusicShareMsg ? 'cr-bubble-music-share' : ''} ${isHtmlMsg ? 'cr-bubble-html' : ''} ${isLocationMsg ? 'cr-bubble-location' : ''}" 
                      oncontextmenu="return false;" 
                      ontouchstart="handleBubbleTouchStart(event, ${index})" 
                      ontouchend="handleBubbleTouchEnd()" 
@@ -4152,9 +4153,233 @@ function handleMoreAction(action) {
         switchFcTab('gift');
         document.getElementById('familyCardLimitInput').value = '';
         document.getElementById('sendFamilyCardModalOverlay').classList.add('show');
+    } else if (action === 'location') {
+        document.getElementById('chatLocationNameInput').value = '';
+        document.getElementById('chatLocationDescInput').value = '';
+        document.getElementById('sendLocationModalOverlay').classList.add('show');
     } else {
         alert(`功能 [${action}] 正在开发中...`);
     }
+}
+
+// --- 发送定位相关逻辑 ---
+let chatMapInstance = null;
+
+function closeSendLocationModal() {
+    document.getElementById('sendLocationModalOverlay').classList.remove('show');
+}
+
+function initChatRealMap() {
+    if (!chatMapInstance) {
+        // 初始化 MapLibre 原生真实地图 (正视角)
+        chatMapInstance = new maplibregl.Map({
+            container: 'realMapContainer',
+            style: {
+                'version': 8,
+                'sources': {
+                    'raster-tiles': {
+                        'type': 'raster',
+                        'tiles': ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                        'tileSize': 256,
+                        'attribution': '© OpenStreetMap'
+                    }
+                },
+                'layers': [{
+                    'id': 'simple-tiles',
+                    'type': 'raster',
+                    'source': 'raster-tiles',
+                    'minzoom': 0,
+                    'maxzoom': 22
+                }]
+            },
+            center: [116.4074, 39.9042], // 默认北京 [lng, lat]
+            zoom: 14,
+            pitch: 0, // 恢复正视角
+            bearing: 0
+        });
+
+        // 添加缩放控件
+        chatMapInstance.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+    }
+    
+    // 延迟一下确保弹窗显示后地图渲染正确
+    setTimeout(() => {
+        chatMapInstance.resize();
+        getChatRealLocation(); // 自动获取一次真实定位
+    }, 300);
+}
+
+// 拦截原有的 location 点击事件，加入地图初始化
+const originalHandleMoreAction = handleMoreAction;
+handleMoreAction = function(action) {
+    if (action === 'location') {
+        document.getElementById('chatLocationNameInput').value = '';
+        document.getElementById('sendLocationModalOverlay').classList.add('show');
+        initChatRealMap(); // 初始化真实地图
+    } else {
+        originalHandleMoreAction(action);
+    }
+};
+
+async function getChatRealLocation() {
+    showToast('正在获取真实定位...', 'loading');
+    
+    const updateLocationUI = (lat, lng, source) => {
+        hideToast();
+        if (chatMapInstance) {
+            chatMapInstance.flyTo({ center: [lng, lat], zoom: 15, speed: 1.5 });
+        }
+        document.getElementById('chatLocationNameInput').value = `我的当前位置`;
+    };
+
+    // 1. 优先尝试设备 GPS 定位
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                updateLocationUI(position.coords.latitude, position.coords.longitude, "GPS");
+            },
+            async (error) => {
+                console.warn("GPS定位失败，尝试网络IP定位兜底...", error);
+                // 2. GPS 失败时，使用支持跨域的 freeipapi 兜底
+                try {
+                    const res = await fetch('https://freeipapi.com/api/json');
+                    const data = await res.json();
+                    if (data.latitude && data.longitude) {
+                        updateLocationUI(data.latitude, data.longitude, "网络定位");
+                    } else {
+                        throw new Error("IP定位无坐标");
+                    }
+                } catch (e) {
+                    hideToast();
+                    alert("获取定位彻底失败，请手动滑动地图选择位置。");
+                }
+            },
+            { timeout: 4000, enableHighAccuracy: true }
+        );
+    } else {
+        // 设备不支持 GPS，直接用 IP 定位
+        try {
+            const res = await fetch('https://freeipapi.com/api/json');
+            const data = await res.json();
+            updateLocationUI(data.latitude, data.longitude, "网络定位");
+        } catch (e) {
+            hideToast();
+            alert("设备不支持且网络定位失败，请手动滑动地图。");
+        }
+    }
+}
+
+// 新增：搜索位置功能
+async function searchChatLocation() {
+    const query = document.getElementById('chatLocationNameInput').value.trim();
+    if (!query) return alert('请输入要搜索的位置！');
+    
+    showToast('正在搜索...', 'loading');
+    try {
+        // 调用免费的 OpenStreetMap 地理编码 API
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+        const data = await res.json();
+        hideToast();
+        
+        if (data && data.length > 0) {
+            const lat = parseFloat(data[0].lat);
+            const lon = parseFloat(data[0].lon);
+            if (chatMapInstance) {
+                chatMapInstance.flyTo({ center: [lon, lat], zoom: 15, speed: 1.5 });
+            }
+            // 将输入框内容更新为搜索到的简短名称
+            document.getElementById('chatLocationNameInput').value = data[0].display_name.split(',')[0];
+        } else {
+            alert('未找到该位置，请尝试更换关键词。');
+        }
+    } catch (e) {
+        hideToast();
+        alert('搜索失败，请检查网络连接。');
+    }
+}
+
+function sendChatLocation() {
+    const name = document.getElementById('chatLocationNameInput').value.trim();
+    if (!name) return alert('请输入位置名称！');
+
+    const safeName = name.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
+    
+    // 获取当前地图中心的经纬度，用于详情页展示和生成瓦片背景
+    let bgUrl = '';
+    let lat = 39.9042;
+    let lng = 116.4074;
+    if (chatMapInstance) {
+        const center = chatMapInstance.getCenter();
+        lat = center.lat;
+        lng = center.lng;
+        const zoom = 15;
+        const x = Math.floor((lng + 180) / 360 * Math.pow(2, zoom));
+        const y = Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom));
+        bgUrl = `https://a.tile.openstreetmap.org/${zoom}/${x}/${y}.png`;
+    }
+
+    // 将经纬度传入 onclick 事件中
+    const content = `
+        <div class="wc-bubble-location-card" onclick="openLocationDetail('${safeName}', ${lat}, ${lng})">
+            <div class="wc-bubble-location-info">
+                <div class="wc-bubble-location-title">${safeName}</div>
+            </div>
+            <div class="wc-bubble-location-map" style="background-image: url('${bgUrl}'); background-size: cover; background-position: center;">
+                <div class="ins-loc-marker"></div>
+            </div>
+        </div>
+    `;
+
+    saveAndRenderUserMessage(content);
+    closeSendLocationModal();
+}
+
+// --- 定位详情弹窗逻辑 ---
+let detailMapInstance = null;
+
+function openLocationDetail(name, lat, lng) {
+    document.getElementById('locationDetailName').innerText = name;
+    document.getElementById('locationDetailModalOverlay').classList.add('show');
+    
+    if (!detailMapInstance) {
+        detailMapInstance = new maplibregl.Map({
+            container: 'detailMapContainer',
+            style: {
+                'version': 8,
+                'sources': {
+                    'raster-tiles': {
+                        'type': 'raster',
+                        'tiles': ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                        'tileSize': 256,
+                        'attribution': '© OpenStreetMap'
+                    }
+                },
+                'layers': [{
+                    'id': 'simple-tiles',
+                    'type': 'raster',
+                    'source': 'raster-tiles',
+                    'minzoom': 0,
+                    'maxzoom': 22
+                }]
+            },
+            center: [lng, lat],
+            zoom: 15,
+            pitch: 0,
+            bearing: 0
+        });
+        detailMapInstance.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+    } else {
+        detailMapInstance.flyTo({ center: [lng, lat], zoom: 15, speed: 2 });
+    }
+    
+    // 延迟重置大小，防止地图渲染不全
+    setTimeout(() => {
+        if (detailMapInstance) detailMapInstance.resize();
+    }, 300);
+}
+
+function closeLocationDetail() {
+    document.getElementById('locationDetailModalOverlay').classList.remove('show');
 }
 
 function closeSendVoiceModal() {
@@ -4505,6 +4730,7 @@ function openChatSettingsPanel() {
     document.getElementById('csMaxReply').value = ChatDB.getItem(`chat_max_reply_${currentChatRoomCharId}`) || '';
     document.getElementById('csTimeAwareToggle').checked = ChatDB.getItem(`chat_time_aware_${currentChatRoomCharId}`) === 'true';
     document.getElementById('csInnerVoiceToggle').checked = ChatDB.getItem(`chat_inner_voice_enabled_${currentChatRoomCharId}`) === 'true';
+    document.getElementById('csWeatherAwareToggle').checked = ChatDB.getItem(`chat_weather_aware_${currentChatRoomCharId}`) === 'true';
     document.getElementById('csBadgeAwareToggle').checked = ChatDB.getItem(`chat_badge_aware_${currentChatRoomCharId}`) === 'true';
     document.getElementById('csActiveMsgToggle').checked = ChatDB.getItem(`chat_active_msg_${currentChatRoomCharId}`) === 'true';
     document.getElementById('csActiveMsgInterval').value = ChatDB.getItem(`chat_active_msg_interval_${currentChatRoomCharId}`) || '60';
@@ -4555,6 +4781,7 @@ function saveChatSettings() {
     const maxReply = document.getElementById('csMaxReply').value;
     const timeAware = document.getElementById('csTimeAwareToggle').checked;
     const innerVoiceEnabled = document.getElementById('csInnerVoiceToggle').checked;
+    const weatherAware = document.getElementById('csWeatherAwareToggle').checked;
     const badgeAware = document.getElementById('csBadgeAwareToggle').checked;
     const activeMsg = document.getElementById('csActiveMsgToggle').checked;
     const activeMsgInterval = document.getElementById('csActiveMsgInterval').value;
@@ -4564,6 +4791,7 @@ function saveChatSettings() {
     ChatDB.setItem(`chat_max_reply_${currentChatRoomCharId}`, maxReply);
     ChatDB.setItem(`chat_time_aware_${currentChatRoomCharId}`, String(timeAware));
     ChatDB.setItem(`chat_inner_voice_enabled_${currentChatRoomCharId}`, String(innerVoiceEnabled));
+    ChatDB.setItem(`chat_weather_aware_${currentChatRoomCharId}`, String(weatherAware));
     ChatDB.setItem(`chat_badge_aware_${currentChatRoomCharId}`, String(badgeAware));
     ChatDB.setItem(`chat_active_msg_${currentChatRoomCharId}`, String(activeMsg));
     ChatDB.setItem(`chat_active_msg_interval_${currentChatRoomCharId}`, activeMsgInterval);
@@ -4741,13 +4969,11 @@ function updateChatRoomAppearance() {
         styleTag.id = 'customChatCssTag';
         document.head.appendChild(styleTag);
     }
-    
     const newCss = rawCss.trim() !== '' ? `
-        #chatRoomPanel, .cs-css-preview-box {
+        #chatRoomPanel, .cs-css-preview-box, #innerVoiceHistoryPanel {
             ${rawCss}
         }
-    ` : '';
-    
+    ` : '';    
     // 【性能优化】：只有当 CSS 真正发生变化时才重新赋值，避免每次打开聊天室都触发全局重绘
     if (styleTag.innerHTML !== newCss) {
         styleTag.innerHTML = newCss;
@@ -4820,6 +5046,7 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
     const maxReply = parseInt(ChatDB.getItem(`chat_max_reply_${targetCharId}`)) || 0;
     const timeAware = ChatDB.getItem(`chat_time_aware_${targetCharId}`) === 'true';
     const innerVoiceEnabled = ChatDB.getItem(`chat_inner_voice_enabled_${targetCharId}`) === 'true';
+    const weatherAware = ChatDB.getItem(`chat_weather_aware_${targetCharId}`) === 'true';
     const badgeAware = ChatDB.getItem(`chat_badge_aware_${targetCharId}`) === 'true';
     const boundEmojiGroups = JSON.parse(ChatDB.getItem(`chat_char_emoji_groups_${targetCharId}`) || '[]');
 
@@ -4887,6 +5114,63 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
     const now = new Date();
     const currentTimeStr = `${now.getFullYear()}年${pad(now.getMonth() + 1)}月${pad(now.getDate())}日 ${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
+    // --- 异步获取真实天气 ---
+    let realWeatherStr = "";
+    if (weatherAware) {
+        try {
+            let cachedWeather = ChatDB.getItem('real_weather_status');
+            let cachedWeatherTime = parseInt(ChatDB.getItem('real_weather_time') || '0');
+            
+            if (cachedWeather && (Date.now() - cachedWeatherTime < 1800000)) { // 30分钟缓存，防止频繁请求
+                realWeatherStr = cachedWeather;
+            } else {
+                // 封装获取坐标的 Promise，带支持跨域的 IP 定位兜底
+                const getCoords = () => new Promise((resolve, reject) => {
+                    if ("geolocation" in navigator) {
+                        navigator.geolocation.getCurrentPosition(
+                            pos => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+                            async err => {
+                                try {
+                                    const res = await fetch('https://freeipapi.com/api/json');
+                                    const data = await res.json();
+                                    if (data.latitude) resolve({ lat: data.latitude, lon: data.longitude });
+                                    else reject(err);
+                                } catch (e) { reject(e); }
+                            },
+                            { timeout: 3000 }
+                        );
+                    } else {
+                        reject(new Error("No geolocation"));
+                    }
+                });
+
+                const coords = await getCoords();
+                
+                // 调用免费天气 API 获取真实天气
+                const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current_weather=true`);
+                const weatherData = await weatherRes.json();
+                const temp = weatherData.current_weather.temperature;
+                const code = weatherData.current_weather.weathercode;
+                
+                // 解析 WMO 天气代码
+                let weatherDesc = "晴朗";
+                if (code >= 1 && code <= 3) weatherDesc = "多云";
+                else if (code >= 45 && code <= 48) weatherDesc = "有雾";
+                else if (code >= 51 && code <= 67) weatherDesc = "下雨";
+                else if (code >= 71 && code <= 77) weatherDesc = "下雪";
+                else if (code >= 80 && code <= 82) weatherDesc = "阵雨";
+                else if (code >= 95) weatherDesc = "雷暴";
+                
+                realWeatherStr = `${weatherDesc}，气温 ${temp}°C`;
+                ChatDB.setItem('real_weather_status', realWeatherStr);
+                ChatDB.setItem('real_weather_time', Date.now().toString());
+            }
+        } catch (e) {
+            console.warn("获取真实天气失败:", e);
+            realWeatherStr = "未知(获取失败)";
+        }
+    }
+
     let systemPrompt = `你正在一个名为“微信”的线上聊天软件中扮演一个角色。请严格遵守以下规则：\n`;
     systemPrompt += `【核心规则】\n`;
     if (timeAware) {
@@ -4912,7 +5196,13 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
     } else {
         systemPrompt += `A. 时间感知：你没有时间观念，不知道现在几点。\n`;
     }
-    systemPrompt += `B. 纯线上互动：这是一个完全虚拟的线上聊天。严禁提出线下见面或索要现实联系方式。你必须始终保持在线身份。\n\n`;
+    systemPrompt += `B. 纯线上互动：这是一个完全虚拟的线上聊天。严禁提出线下见面或索要现实联系方式。你必须始终保持在线身份。\n`;
+    
+    if (weatherAware && realWeatherStr !== "未知(获取失败)") {
+        systemPrompt += `C. 环境感知：你能够感知到 ${userName} 所在地的真实天气是：【${realWeatherStr}】。你可以自然地在对话中提及天气，比如提醒加衣、带伞、或者表达关心。\n\n`;
+    } else {
+        systemPrompt += `\n`;
+    }
 
     if (activeWbs.top.length > 0) systemPrompt += `[背景设定]\n${activeWbs.top.join('\n')}\n\n`;
     
@@ -5201,6 +5491,11 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
         if (msg.type === 'forward_record') {
             const recordText = msg.forwardData.map(d => `${d.name}: ${d.content}`).join('\n');
             content = `${source}*${senderName} 转发了一段聊天记录*:\n${recordText}`;
+        } else if (content.includes('wc-bubble-location-card')) {
+            // 提取定位卡片中的位置名称，让 AI 知道你发了什么定位
+            const match = content.match(/<div class="wc-bubble-location-title">(.*?)<\/div>/);
+            const locName = match ? match[1] : "未知位置";
+            content = `${source}*${senderName} 发送了一个位置定位：[${locName}]*`;
         } else if (content.includes('chat-desc-img-120')) {
             const match = content.match(/<div class="img-text">([\s\S]*?)<\/div>/);
             const desc = match ? match[1] : "未知图片";
@@ -7787,7 +8082,6 @@ function openInnerVoiceHistoryPanel() {
 function closeInnerVoiceHistoryPanel() {
     document.getElementById('innerVoiceHistoryPanel').style.display = 'none';
 }
-
 function renderInnerVoiceHistory() {
     const listEl = document.getElementById('innerVoiceHistoryList');
     listEl.innerHTML = '';
@@ -7802,17 +8096,20 @@ function renderInnerVoiceHistory() {
         return;
     }
     
-    ivHistory.forEach((iv, index) => {
+    // 倒序渲染，最新的在最上面
+    ivHistory.slice().reverse().forEach((iv, index) => {
         const item = document.createElement('div');
+        // 增加 class 方便自定义 CSS
+        item.className = 'inner-voice-history-item';
         item.style.cssText = 'background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative;';
         
         const date = new Date(iv.timestamp);
         const timeStr = `${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
         
         item.innerHTML = `
-            <div style="font-size: 11px; color: #aaa; margin-bottom: 8px;">${timeStr}</div>
-            <div style="font-size: 14px; color: #333; line-height: 1.5; word-break: break-all;">${iv.content}</div>
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; border-top: 1px solid #f5f5f5; padding-top: 10px;">
+            <div class="iv-history-time" style="font-size: 11px; color: #aaa; margin-bottom: 8px;">${timeStr}</div>
+            <div class="iv-history-content" style="font-size: 14px; color: #333; line-height: 1.5; word-break: break-all;">${iv.content}</div>
+            <div class="iv-history-actions" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; border-top: 1px solid #f5f5f5; padding-top: 10px;">
                 <div onclick="openEditInnerVoiceModal('${iv.id}')" style="font-size: 12px; color: #576b95; cursor: pointer; font-weight: bold;">编辑</div>
                 <div onclick="deleteInnerVoice('${iv.id}')" style="font-size: 12px; color: #ff3b30; cursor: pointer; font-weight: bold;">删除</div>
             </div>
@@ -7820,7 +8117,6 @@ function renderInnerVoiceHistory() {
         listEl.appendChild(item);
     });
 }
-
 function openEditInnerVoiceModal(id) {
     const currentLoginId = ChatDB.getItem('current_login_account');
     let ivHistory = JSON.parse(ChatDB.getItem(`inner_voice_history_${currentLoginId}_${currentChatRoomCharId}`) || '[]');
