@@ -1,3 +1,85 @@
+/* --- MCP 配置区域样式 --- */
+.mcp-config-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 20px;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+.mcp-config-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    color: #888;
+    letter-spacing: 1px;
+    margin-bottom: 18px;
+}
+.mcp-config-field {
+    margin-bottom: 16px;
+}
+.mcp-config-label {
+    font-size: 12px;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 6px;
+    display: block;
+    letter-spacing: 0.5px;
+}
+.mcp-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #f7f7f7;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 10px 12px;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+.mcp-input-wrapper:focus-within {
+    background: #fff;
+    border-color: #ccc;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.mcp-input-wrapper input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 13px;
+    color: #333;
+    font-weight: 500;
+}
+.mcp-input-wrapper input::placeholder {
+    color: #bbb;
+    font-weight: normal;
+    font-size: 12px;
+}
+.mcp-config-save {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #111;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 5px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    letter-spacing: 1px;
+}
+.mcp-config-save:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
 /* --- 基础样式与变量 --- */
 :root {
     --app-height: 100vh; /* 默认值，会被 JS 动态覆盖 */

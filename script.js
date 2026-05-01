@@ -1751,8 +1751,8 @@ function captureFullState() {
         apps: {},
         texts: Array.from(document.querySelectorAll('[contenteditable="true"]')).map(el => el.innerText)
     };
-    for (let i = 1; i <= 7; i++) {
-        let appId = i === 5 ? 'app-dock1' : (i === 6 ? 'app-dock-music' : (i === 7 ? 'app-mall' : `app${i}`));
+    for (let i = 1; i <= 8; i++) {
+        let appId = i === 5 ? 'app-dock1' : (i === 6 ? 'app-dock-music' : (i === 7 ? 'app-mall' : (i === 8 ? 'app-dock-call' : `app${i}`)));
         state.apps[appId] = {
             icon: document.getElementById(`icon-${appId}`).style.backgroundImage,
             name: document.getElementById(`name-${appId}`).innerText
@@ -1819,8 +1819,8 @@ function applyFullState(state) {
         });
     }
     
-    for (let i = 1; i <= 7; i++) {
-        let appId = i === 5 ? 'app-dock1' : (i === 6 ? 'app-dock-music' : (i === 7 ? 'app-mall' : `app${i}`));
+    for (let i = 1; i <= 8; i++) {
+        let appId = i === 5 ? 'app-dock1' : (i === 6 ? 'app-dock-music' : (i === 7 ? 'app-mall' : (i === 8 ? 'app-dock-call' : `app${i}`)));
         const appData = state.apps[appId];
         if (appData) {
             const appIconEl = document.getElementById(`icon-${appId}`);
@@ -1899,7 +1899,8 @@ async function confirmResetDefault() {
             { id: 'app4', name: 'chat' },
             { id: 'app-mall', name: 'Shopping' },
             { id: 'app-dock1', name: 'Chars' },
-            { id: 'app-dock-music', name: 'Music' }
+            { id: 'app-dock-music', name: 'Music' },
+            { id: 'app-dock-call', name: 'Call' }
         ];
 
         defaultApps.forEach(app => {
@@ -2605,7 +2606,33 @@ function addWidgetToDesktop(type) {
     }
 }
 
+// ========== MCP 配置管理 ==========
+function saveMcpConfig() {
+    const mcpAddress = document.getElementById('mcpAddressInput').value.trim();
+    const mcpRoleId = document.getElementById('mcpRoleIdInput').value.trim();
+    localStorage.setItem('mcpAddress', mcpAddress);
+    localStorage.setItem('mcpRoleId', mcpRoleId);
+    alert('MCP 配置已保存');
+}
+
+function loadMcpConfig() {
+    const mcpAddress = localStorage.getItem('mcpAddress') || '';
+    const mcpRoleId = localStorage.getItem('mcpRoleId') || '';
+    const addrInput = document.getElementById('mcpAddressInput');
+    const roleInput = document.getElementById('mcpRoleIdInput');
+    if (addrInput) addrInput.value = mcpAddress;
+    if (roleInput) roleInput.value = mcpRoleId;
+}
+
+function getMcpConfig() {
+    return {
+        address: localStorage.getItem('mcpAddress') || '',
+        roleId: localStorage.getItem('mcpRoleId') || ''
+    };
+}
+
 // 页面加载时初始化渲染
 window.addEventListener('DOMContentLoaded', () => {
     renderImportedWidgets();
+    loadMcpConfig();
 });

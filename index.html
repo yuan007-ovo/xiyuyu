@@ -747,6 +747,32 @@
                     </span>
                 </div>
             </div>
+
+            <!-- MCP 配置区域 -->
+            <div class="mcp-config-box">
+                <div class="mcp-config-header">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="#bbb"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                    <span>MCP 连接配置</span>
+                </div>
+                <div class="mcp-config-field">
+                    <label class="mcp-config-label">MCP 服务地址</label>
+                    <div class="mcp-input-wrapper">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#bbb" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        <input type="text" id="mcpAddressInput" placeholder="例如：https://mcp.example.com/sse">
+                    </div>
+                </div>
+                <div class="mcp-config-field">
+                    <label class="mcp-config-label">专属角色 ID</label>
+                    <div class="mcp-input-wrapper">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="#bbb" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <input type="text" id="mcpRoleIdInput" placeholder="填入你的专属角色 ID">
+                    </div>
+                </div>
+                <div class="mcp-config-save" onclick="saveMcpConfig()">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    保存配置
+                </div>
+            </div>
         </div>
 
         <!-- 通知与提示音设置弹窗 -->
