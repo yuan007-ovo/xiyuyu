@@ -244,6 +244,7 @@ function callStartCall(targetIdOrNumber, isUnknown = false) {
 
     let balance = parseFloat(ChatDB.getItem(`call_balance_${currentLoginId}`) || '0');
     if (balance <= 0) {
+        if (typeof send10086Reminder === 'function') send10086Reminder(currentLoginId);
         return alert('你的话费余额不足，无法打电话！请前往营业厅充值。');
     }
 
@@ -542,6 +543,7 @@ function callStartCall(targetIdOrNumber, isUnknown = false) {
 
     let balance = parseFloat(ChatDB.getItem(`call_balance_${currentLoginId}`) || '0');
     if (balance <= 0) {
+        if (typeof send10086Reminder === 'function') send10086Reminder(currentLoginId);
         return alert('你的话费余额不足，无法打电话！请前往营业厅充值。');
     }
 
@@ -782,6 +784,57 @@ function closeCallContactDetail() {
 function callStartCallFromContact() {
     if (currentContactDetailId) {
         callStartCall(currentContactDetailId);
+    }
+}
+
+function jumpToSmsFromCall() {
+    if (!currentContactDetailId) return;
+    const charId = currentContactDetailId;
+    let allEntities = typeof getAllEntities === 'function' ? getAllEntities() : [];
+    const char = allEntities.find(e => e.id === charId);
+    if (!char) return;
+    
+    const currentLoginId = ChatDB.getItem('current_login_account');
+    let remarks = JSON.parse(ChatDB.getItem(`char_remarks_${currentLoginId}`) || '{}');
+    const displayName = remarks[char.id] || char.netName || char.name;
+    
+    closeCallContactDetail();
+    closeCallAppPanel();
+    
+    if (typeof openSmsApp === 'function') {
+        openSmsApp();
+        openSmsChat(char.id, displayName, char.avatarUrl, '#111', displayName.charAt(0));
+    }
+}
+
+// --- 10086 余额不足提醒 ---
+function send10086Reminder(accountId) {
+    let history = JSON.parse(ChatDB.getItem(`sms_history_${accountId}_10086`) || '[]');
+    
+    if (history.length > 0) {
+        const lastMsg = history[history.length - 1];
+        if (Date.now() - lastMsg.timestamp < 60000) return; // 1分钟内不重复提醒
+    }
+
+    const reminderMsg = {
+        role: 'char',
+        type: 'text',
+        content: '【余额不足提醒】尊敬的客户，您的话费余额已不足，为避免影响您的正常通信，请及时充值。',
+        senderName: '10086',
+        timestamp: Date.now()
+    };
+
+    history.push(reminderMsg);
+    ChatDB.setItem(`sms_history_${accountId}_10086`, JSON.stringify(history));
+
+    let smsSessions = JSON.parse(ChatDB.getItem(`sms_sessions_${accountId}`) || '[]');
+    smsSessions = smsSessions.filter(id => id !== '10086');
+    smsSessions.unshift('10086');
+    ChatDB.setItem(`sms_sessions_${accountId}`, JSON.stringify(smsSessions));
+
+    if (typeof renderSmsList === 'function') renderSmsList();
+    if (typeof currentSmsTargetId !== 'undefined' && currentSmsTargetId === '10086') {
+        if (typeof renderSmsHistory === 'function') renderSmsHistory();
     }
 }
 // 独立出的接通逻辑

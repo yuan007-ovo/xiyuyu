@@ -3612,6 +3612,20 @@ function openChatRoom(charId) {
         document.getElementById('chatRoomInput').value = '';
         closeChatPanels(); 
         
+        // 检查拉黑状态，屏蔽微信输入框
+        let blacklist = JSON.parse(ChatDB.getItem(`blacklist_${currentLoginId}`) || '[]');
+        const bottomBar = document.getElementById('chatRoomBottomBar');
+        const inputEl = document.getElementById('chatRoomInput');
+        if (blacklist.includes(charId)) {
+            bottomBar.style.pointerEvents = 'none';
+            bottomBar.style.opacity = '0.5';
+            inputEl.placeholder = '已拉黑，消息将通过短信接收';
+        } else {
+            bottomBar.style.pointerEvents = 'auto';
+            bottomBar.style.opacity = '1';
+            inputEl.placeholder = 'Entering......';
+        }
+
         // 【终极流畅修复】：移除 requestAnimationFrame 阻塞，直接显示面板并渲染，与流畅版项目保持一致
         document.getElementById('chatRoomPanel').style.display = 'flex';
         updateChatRoomAppearance(); 
@@ -3652,8 +3666,34 @@ function openCharProfilePanel(charId) {
         // 修改点：这里显示真实的 signature 字段，而不是 description(人设)
         document.getElementById('cpSign').innerText = char.signature || '该用户很懒，还没有写下签名。';
         
+        // 读取拉黑状态
+        let blacklist = JSON.parse(ChatDB.getItem(`blacklist_${currentLoginId}`) || '[]');
+        const btn = document.getElementById('cpBlacklistBtn');
+        if (btn) {
+            btn.innerText = blacklist.includes(charId) ? '取消拉黑' : '拉黑';
+        }
+
         document.getElementById('charProfilePanel').style.display = 'flex';
     }
+}
+
+// 新增：拉黑/取消拉黑逻辑
+function toggleBlacklist() {
+    if (!currentProfileCharId) return;
+    const currentLoginId = ChatDB.getItem('current_login_account');
+    let blacklist = JSON.parse(ChatDB.getItem(`blacklist_${currentLoginId}`) || '[]');
+    
+    const index = blacklist.indexOf(currentProfileCharId);
+    if (index > -1) {
+        blacklist.splice(index, 1);
+        alert('已取消拉黑，恢复微信聊天。');
+    } else {
+        blacklist.push(currentProfileCharId);
+        alert('已拉黑！对方现在只能通过短信 APP 联系你。');
+    }
+    
+    ChatDB.setItem(`blacklist_${currentLoginId}`, JSON.stringify(blacklist));
+    openCharProfilePanel(currentProfileCharId); // 刷新按钮状态
 }
 
 // 新增函数：编辑备注
@@ -5072,12 +5112,21 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
     const userName = account ? (account.netName || 'User') : 'User';
     const userRealName = persona ? (persona.realName || userName) : userName; // 提取真名
 
-    let fullHistory = JSON.parse(ChatDB.getItem(`chat_history_${currentLoginId}_${targetCharId}`) || '[]');
+    // 核心修改：同时获取微信和短信的历史记录，实现记忆互通
+    let chatHistory = JSON.parse(ChatDB.getItem(`chat_history_${currentLoginId}_${targetCharId}`) || '[]');
+    let smsHistory = JSON.parse(ChatDB.getItem(`sms_history_${currentLoginId}_${targetCharId}`) || '[]');
+    
+    // 给短信记录打上标记，方便大模型区分
+    smsHistory = smsHistory.map(m => ({...m, isSms: true}));
+    
+    let fullHistory = [...chatHistory, ...smsHistory];
     
     if (typeof currentCallTargetId !== 'undefined' && currentCallTargetId === targetCharId && typeof currentCallTranscript !== 'undefined') {
         fullHistory = [...fullHistory, ...currentCallTranscript];
-        fullHistory.sort((a, b) => a.timestamp - b.timestamp); 
     }
+    
+    // 按时间戳统一排序，让大模型看到正确的时间线
+    fullHistory.sort((a, b) => a.timestamp - b.timestamp); 
 
     let recentHistory = contextLimit > 0 ? fullHistory.slice(-contextLimit) : fullHistory.slice(-40);
     const recentTextForWb = recentHistory.slice(-5).map(m => m.content).join('\n');
@@ -5484,7 +5533,10 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
         let senderName = isUser ? userName : charName;
 
         let source = '';
-        if (typeof currentCallTranscript !== 'undefined' && currentCallTranscript.some(t => t.timestamp === msg.timestamp)) {
+        // 核心修改：在喂给大模型的上下文中，标注哪些是短信
+        if (msg.isSms) {
+            source = '[短信] ';
+        } else if (typeof currentCallTranscript !== 'undefined' && currentCallTranscript.some(t => t.timestamp === msg.timestamp)) {
             source = '[语音通话中] ';
         }
 

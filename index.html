@@ -374,6 +374,13 @@
             </div>
             <div class="app-name" id="name-app2">settings</div>
         </div>
+        <!-- 新增：微博 APP (第五行第四个) -->
+        <div class="app-item" onclick="openWeiboPanel()">
+            <div class="app-icon" id="icon-app-weibo">
+                <svg viewBox="0 0 24 24" width="28" height="28" stroke="#8e8e93" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+            </div>
+            <div class="app-name" id="name-app-weibo">Weibo</div>
+        </div>
         <div class="app-item" onclick="openWorldbookPanel()">
             <div class="app-icon" id="icon-app3">
                 <svg viewBox="0 0 24 24" width="28" height="28"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
@@ -412,6 +419,16 @@
                     <svg viewBox="0 0 24 24" width="28" height="28"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                 </div>
                 <div class="app-name" id="name-app-dock-call" style="display: none;">Call</div>
+            </div>
+            <!-- 新增：短信 APP -->
+            <div class="app-item" onclick="openSmsApp()">
+                <div class="app-icon" id="icon-app-dock-sms" style="border-radius: 18px;">
+                    <svg viewBox="0 0 24 24" width="28" height="28" stroke="#8e8e93" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"></path>
+                        <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"></path>
+                    </svg>
+                </div>
+                <div class="app-name" id="name-app-dock-sms" style="display: none;">message</div>
             </div>
         </div>
     </div>
@@ -634,6 +651,32 @@
                         <div class="skeleton-subline"></div>
                     </div>
                     <div class="item-deco">call <svg viewBox="0 0 24 24" width="12" height="12" stroke="#d0d0d0" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
+                </div>
+                <div class="app-setting-item">
+                    <div class="app-icon-upload" data-target="icon-app-dock-sms">
+                        <svg class="placeholder-svg" viewBox="0 0 24 24" width="24" height="24" stroke="#ccc" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        <div class="camera-badge">
+                            <svg viewBox="0 0 24 24" width="10" height="10" stroke="#666" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        </div>
+                    </div>
+                    <div class="app-input-group">
+                        <input type="text" class="app-name-input" data-target="name-app-dock-sms" value="message">
+                        <div class="skeleton-subline"></div>
+                    </div>
+                    <div class="item-deco">sms <svg viewBox="0 0 24 24" width="12" height="12" stroke="#d0d0d0" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
+                </div>
+                <div class="app-setting-item">
+                    <div class="app-icon-upload" data-target="icon-app-weibo">
+                        <svg class="placeholder-svg" viewBox="0 0 24 24" width="24" height="24" stroke="#ccc" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        <div class="camera-badge">
+                            <svg viewBox="0 0 24 24" width="10" height="10" stroke="#666" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        </div>
+                    </div>
+                    <div class="app-input-group">
+                        <input type="text" class="app-name-input" data-target="name-app-weibo" value="Weibo">
+                        <div class="skeleton-subline"></div>
+                    </div>
+                    <div class="item-deco">weibo <svg viewBox="0 0 24 24" width="12" height="12" stroke="#d0d0d0" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
                 </div>
             </div>
 
@@ -2006,6 +2049,10 @@
                     角色记忆库
                 </div>
                 <div onclick="clearChatHistory()" style="background: #f4f4f4; color: #333; text-align: center; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; border: 1px solid #eee;">清空聊天记录</div>
+                
+                <!-- 新增：拉黑按钮 -->
+                <div id="cpBlacklistBtn" onclick="toggleBlacklist()" style="background: #fff; color: #ff3b30; text-align: center; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; border: 1px solid #ffe5e5;">拉黑</div>
+                
                 <div onclick="deleteContactChar()" style="background: #fff; color: #ff3b30; text-align: center; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; border: 1px solid #ffe5e5;">删除好友</div>
             </div>
         </div>
@@ -5394,6 +5441,689 @@
             <div style="text-align: center; font-size: 12px; color: #888; margin-top: 15px;">* 凭此小票可查看订单详情 *</div>
         </div>
     </div>
+
+    <!-- =========================================
+         新增：Weibo APP 全屏面板
+         ========================================= -->
+    <div class="theme-panel instant-panel" id="weiboPanel" style="z-index: 155; background-color: #f4f4f5; padding: 0;">
+        
+        <!-- 微博登录页面 (覆盖在最上层) -->
+        <div class="wb-login-page" id="wbLoginPage">
+            <!-- 模仿主题APP/设置APP的顶栏 -->
+            <div class="panel-header">
+                <div class="header-close" onclick="closeWeiboPanel()" style="font-size: 15px;">BACK</div>
+                <div class="header-title-wrapper">
+                    <div class="header-title" style="cursor: default;">Weibo Login</div>
+                </div>
+                <div class="header-close" style="visibility: hidden; font-size: 15px;">DONE</div>
+            </div>
+            
+            <div class="panel-content" style="padding-top: 20px; background: #ffffff; align-items: center; position: relative; overflow: hidden;">
+                
+                <!-- 背景装饰五角星 (复用激活码页面的样式) -->
+                <svg class="bg-star bg-star-1" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                <svg class="bg-star bg-star-2" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                <svg class="bg-star bg-star-3" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                <svg class="bg-star bg-star-4" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+
+                <div class="auth-container" style="width: 100%; max-width: 320px; margin-top: 10px;">
+                    <!-- Logo 与包裹的五角星 -->
+                    <div class="logo-wrapper">
+                        <svg class="star-deco s1" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        <svg class="star-deco s2" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        <svg class="star-deco s3" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        <svg class="star-deco s4" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        <!-- 微博图标作为 Logo -->
+                        <div style="width: 100px; height: 100px; border-radius: 24px; background: #111; display: flex; justify-content: center; align-items: center; position: relative; z-index: 2; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+                            <svg viewBox="0 0 24 24" width="50" height="50" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+                        </div>
+                    </div>
+                    
+                    <div class="auth-title" style="margin-bottom: 30px;">Weibo</div>
+
+                    <!-- 1. 账号密码登录区域 (默认显示) -->
+                    <div id="wbLoginPwdSection" class="auth-section active" style="width: 100%;">
+                        <div class="auth-input-group">
+                            <div class="auth-input-label">
+                                <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                                账号
+                            </div>
+                            <div class="auth-input-wrapper">
+                                <input type="text" class="auth-input" id="wbLoginAccount" placeholder="请输入 Chat 账号">
+                            </div>
+                        </div>
+                        <div class="auth-input-group" style="margin-bottom: 15px;">
+                            <div class="auth-input-label">
+                                <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                                密码
+                            </div>
+                            <div class="auth-input-wrapper">
+                                <input type="password" class="auth-input" id="wbLoginPassword" placeholder="请输入密码">
+                                <svg class="auth-eye-icon" onclick="toggleAuthPassword('wbLoginPassword', this)" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <button class="auth-submit-btn" onclick="weiboLoginWithPassword()">登 录</button>
+                        
+                        <div class="auth-switch-text" onclick="document.getElementById('wbLoginPwdSection').classList.remove('active'); document.getElementById('wbLoginQuickSection').classList.add('active');">
+                            是否选择快捷登陆？ <span>点击进入快捷登陆页面</span>
+                        </div>
+                    </div>
+
+                    <!-- 2. 快捷登录区域 (默认隐藏) -->
+                    <div id="wbLoginQuickSection" class="auth-section" style="width: 100%;">
+                        <div style="font-size: 12px; color: #888; margin-bottom: 15px; text-align: center; font-weight: bold;">请选择已在 Chat 中注册的账号</div>
+                        
+                        <div class="wb-account-list" id="wbAccountList" style="width: 100%; max-height: 220px; overflow-y: auto; padding: 0 5px;">
+                            <!-- JS 动态渲染账号列表 -->
+                        </div>
+                        
+                        <div class="auth-switch-text" onclick="document.getElementById('wbLoginQuickSection').classList.remove('active'); document.getElementById('wbLoginPwdSection').classList.add('active');">
+                            想起来密码了？ <span>返回账号密码登陆</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="wb-page-wrapper">
+            <!-- 1. 首页 -->
+            <div class="wb-page active" id="wb-page-home">
+                <div class="wb-top-nav">
+                    <svg class="wb-icon-btn" viewBox="0 0 24 24" onclick="closeWeiboPanel()"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <div class="wb-nav-tabs">
+                        <span id="wbHomeTab-follow" onclick="switchWeiboHomeTab('follow')">关注</span>
+                        <span id="wbHomeTab-recommend" class="active" onclick="switchWeiboHomeTab('recommend')">推荐</span>
+                        <span id="wbHomeTab-hot" onclick="switchWeiboHomeTab('hot')">热榜</span>
+                    </div>
+                    <!-- 右上角改为生成键 -->
+                    <svg class="wb-icon-btn" viewBox="0 0 24 24" onclick="openWeiboHomeGenModal()" title="生成微博"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                </div>
+                
+                <!-- 关注流 -->
+                <div class="wb-scroll-area wb-feed-list" id="wbHomeFollowList" style="display: none;">
+                    <!-- 动态渲染关注的人的微博 -->
+                </div>
+
+                <!-- 推荐流 -->
+                <div class="wb-scroll-area wb-feed-list" id="wbHomeFeedList">
+                    <!-- 动态渲染所有微博 -->
+                </div>
+
+                <!-- 热榜流 -->
+                <div class="wb-scroll-area wb-hot-board-list" id="wbHomeHotList" style="display: none; background: #fff;">
+                    <!-- 动态渲染热搜榜单 -->
+                </div>
+            </div>
+
+            <!-- 2. 视频页 -->
+            <div class="wb-page" id="wb-page-video" style="background-color: #111; color: #fff;">
+                <div class="wb-video-container">
+                    <div class="wb-video-right-actions">
+                        <div class="wb-video-avatar"></div>
+                        <div class="wb-video-action" onclick="toggleWeiboLike(this)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="wb-like-count">1.2w</span></div>
+                        <div class="wb-video-action"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>856</div>
+                        <div class="wb-video-action"><svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>转发</div>
+                    </div>
+                    <div class="wb-video-info">
+                        <div class="wb-video-username">@视觉艺术</div>
+                        <div class="wb-video-desc">黑白灰的极致拉扯，感受光影的魅力。#摄影 #黑白</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 发现页 (超话与推荐) -->
+            <div class="wb-page" id="wb-page-discover">
+                <div class="wb-search-header" style="display: flex; align-items: center; gap: 10px;">
+                    <div class="wb-search-bar" style="flex: 1;">
+                        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" placeholder="搜索大家都在搜：极简桌面布局">
+                    </div>
+                    <!-- 新增：生成超话按钮 -->
+                    <div onclick="generateWeiboSuperTopicsAPI()" style="width: 32px; height: 32px; border-radius: 50%; background: #111; display: flex; justify-content: center; align-items: center; cursor: pointer; flex-shrink: 0;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    </div>
+                </div>
+                <div class="wb-scroll-area" style="background: #f4f4f4;">
+                    <!-- 我的超话区块 -->
+                    <div style="background: #fff; padding: 15px; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <span style="font-size: 15px; font-weight: bold; color: #111;">我的超话</span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <!-- 新增：手动创建超话按钮 -->
+                                <span style="font-size: 12px; color: #111; font-weight: bold; cursor: pointer; background: #f4f4f4; padding: 4px 10px; border-radius: 12px;" onclick="openWeiboCreateSuperTopic()">+ 创建</span>
+                                <span style="font-size: 12px; color: #888;">查看全部 ></span>
+                            </div>
+                        </div>
+                        <div id="wbMySuperTopicList" style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
+                            <!-- 动态渲染我的超话 -->
+                        </div>
+                    </div>
+
+                    <!-- 超话推荐流 -->
+                    <div style="background: #fff; padding: 15px;">
+                        <div style="font-size: 15px; font-weight: bold; color: #111; margin-bottom: 15px;">超话推荐</div>
+                        <div id="wbDiscoverSuperList" style="display: flex; flex-direction: column; gap: 15px;">
+                            <!-- 动态渲染超话推荐 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 4. 消息页 -->
+            <div class="wb-page" id="wb-page-message">
+                <div class="wb-msg-header" style="display: flex; justify-content: space-between; align-items: center; padding: 44px 15px 10px;">
+                    <div style="width: 24px;"></div>
+                    <div>消息</div>
+                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="#111" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" onclick="openWeiboMsgGenModal()" style="cursor: pointer;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </div>
+                <div class="wb-msg-nav-row">
+                    <div class="wb-msg-nav-item"><div class="wb-msg-icon-wrap"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><span>@我的</span></div>
+                    <div class="wb-msg-nav-item"><div class="wb-msg-icon-wrap"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div><span>评论</span></div>
+                    <div class="wb-msg-nav-item"><div class="wb-msg-icon-wrap"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><span>赞</span></div>
+                </div>
+                <div class="wb-scroll-area wb-msg-list" id="wbMessageListContainer">
+                    <!-- 动态渲染私信列表 -->
+                </div>
+            </div>
+
+            <!-- 5. 我的页 -->
+            <div class="wb-page" id="wb-page-profile">
+                <div class="wb-scroll-area">
+                    <div class="wb-profile-header">
+                        <div class="wb-profile-bg" id="wbProfileBg" onclick="document.getElementById('wbProfileBgInput').click()"></div>
+                        <input type="file" id="wbProfileBgInput" accept="image/*" style="display: none;" onchange="handleWbProfileBgUpload(event)">
+                        <div class="wb-profile-top-actions">
+                            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <svg viewBox="0 0 24 24" onclick="openWeiboSettings()"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        </div>
+                        <div class="wb-profile-user-wrap">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                <div class="wb-profile-avatar"></div>
+                                <div onclick="openWeiboEditProfile()" style="border: 1px solid #ccc; border-radius: 16px; padding: 4px 12px; font-size: 12px; font-weight: bold; color: #333; cursor: pointer; margin-bottom: 10px;">编辑资料</div>
+                            </div>
+                            <div class="wb-profile-name">User_001</div>
+                            <div class="wb-profile-bio">简介：保持简单，保持专注。</div>
+                            <div class="wb-profile-stats">
+                                <div class="wb-stat-item"><span class="wb-stat-num" id="wbProfilePostCount">0</span><span class="wb-stat-label">微博</span></div>
+                                <div class="wb-stat-item" onclick="openWeiboFollowPanel('follow')" style="cursor: pointer;"><span class="wb-stat-num" id="wbProfileFollowCount">0</span><span class="wb-stat-label">关注</span></div>
+                                <div class="wb-stat-item" onclick="openWeiboFollowPanel('fans')" style="cursor: pointer;"><span class="wb-stat-num" id="wbProfileFansCount">0</span><span class="wb-stat-label">粉丝</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="wb-profile-tabs">
+                        <div class="wb-profile-tab active">主页</div>
+                        <div class="wb-profile-tab">微博</div>
+                        <div class="wb-profile-tab">相册</div>
+                    </div>
+                    <div class="wb-feed-list" id="wbProfileFeedList" style="padding-top: 8px;">
+                        <!-- 动态渲染个人主页微博 -->
+                    </div>
+                </div>
+             </div>                
+        <!-- 底部悬浮发帖按钮 (ins风半透明浅灰) -->
+        <div id="wbGlobalPostBtn" style="position: absolute; bottom: 80px; right: 20px; width: 50px; height: 50px; background: rgba(245, 245, 245, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(0,0,0,0.05); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06); cursor: pointer; z-index: 90;" onclick="openWeiboPostPage()">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </div>
+
+        <!-- 底部导航 -->
+        <div class="wb-bottom-nav">
+            <div class="wb-nav-item active" onclick="switchWeiboTab('wb-page-home', this)">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke-linejoin="round"/></svg>
+                <span class="wb-nav-text">首页</span>
+            </div>
+            <div class="wb-nav-item" onclick="switchWeiboTab('wb-page-video', this)">
+                <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+                <span class="wb-nav-text">视频</span>
+            </div>
+            
+            <!-- 恢复发现页按钮 -->
+            <div class="wb-nav-item" onclick="switchWeiboTab('wb-page-discover', this)">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="wb-nav-text">发现</span>
+            </div>
+
+            <div class="wb-nav-item" onclick="switchWeiboTab('wb-page-message', this)">
+                <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                <span class="wb-nav-text">消息</span>
+            </div>
+            <div class="wb-nav-item" onclick="switchWeiboTab('wb-page-profile', this)">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span class="wb-nav-text">我</span>
+            </div>
+        </div>
+
+    </div>
+    </div> <!-- 👈 关键修复：在这里闭合 weiboPanel -->
+    <!-- 微博帖子详情全屏面板 -->
+    <div class="theme-panel instant-panel" id="weiboPostDetailPanel" style="z-index: 185; background-color: #fff;">
+        <div class="panel-header" style="background: #fff; border-bottom: 1px solid #f0f0f0;">
+            <div class="header-close" onclick="closeWeiboPostDetail()" style="font-size: 15px; color: #333;">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </div>
+            <div class="header-title-wrapper"><div class="header-title" style="background: transparent; box-shadow: none; font-size: 16px; color: #111; padding: 0; transform: none;">微博正文</div></div>
+            <div class="header-close" style="visibility: hidden; width: 24px;"></div>
+        </div>
+        <div class="panel-content" style="padding: 0; overflow-y: auto; padding-bottom: 80px;">
+            <div id="wbPostDetailContent"></div>
+            <div style="height: 8px; background: #f4f4f5;"></div>
+            <div style="padding: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div style="font-size: 14px; font-weight: bold; color: #111;">全部评论 <span id="wbPostDetailCommentCount" style="font-size: 12px; color: #888; font-weight: normal;">0</span></div>
+                    <div onclick="generateWeiboCommentsAPI()" style="font-size: 12px; color: #ff8200; font-weight: bold; cursor: pointer; background: #fff5e5; padding: 4px 10px; border-radius: 12px;">+ 生成评论</div>
+                </div>
+                <div id="wbPostDetailComments" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="text-align: center; color: #888; font-size: 12px; padding: 20px;">暂无评论</div>
+                </div>
+            </div>
+        </div>
+        <!-- 底部评论输入框 -->
+        <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 1px solid #eee; padding: 10px 15px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 20; display: flex; gap: 10px; align-items: center;">
+            <input type="hidden" id="wbCommentReplyTarget">
+            <input type="text" id="wbCommentInput" placeholder="写评论..." style="flex: 1; background: #f4f4f4; border-radius: 20px; padding: 8px 15px; border: none; outline: none; font-size: 14px; color: #333;">
+            <div onclick="submitWeiboComment()" style="color: #ff8200; font-size: 14px; font-weight: bold; cursor: pointer;">发送</div>
+        </div>
+    </div>
+
+    <!-- 微博视频评论弹窗 -->
+    <div class="preset-modal-overlay" id="wbVideoCommentsOverlay" style="z-index: 190; align-items: flex-end; padding-bottom: 0;">
+        <div style="width: 100%; height: 70%; background: #fff; border-radius: 20px 20px 0 0; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s ease;" id="wbVideoCommentsSheet">
+            <div style="padding: 15px; text-align: center; font-size: 14px; font-weight: bold; border-bottom: 1px solid #eee; position: relative;">
+                <span id="wbVideoCommentsCount">856 条评论</span>
+                <div onclick="closeWbVideoComments()" style="position: absolute; right: 15px; top: 15px; cursor: pointer; color: #888;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </div>
+            </div>
+            <div style="flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px;">
+                <div style="text-align: center; color: #888; font-size: 12px; padding: 20px;">暂无评论</div>
+            </div>
+            <div style="padding: 10px 15px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid #eee; display: flex; gap: 10px;">
+                <input type="text" placeholder="留下你的精彩评论吧" style="flex: 1; background: #f4f4f4; border-radius: 20px; padding: 8px 15px; border: none; outline: none; font-size: 14px;">
+            </div>
+        </div>
+    </div>
+
+    <!-- 发布页面 (Modal) 移到最外层，防止被遮挡 -->
+    <div class="wb-post-modal" id="wbPostModal">
+        <div class="wb-post-modal-header">
+            <div class="wb-post-cancel-btn" onclick="closeWeiboPostPage()">取消</div>
+            <div class="wb-post-submit-btn" onclick="submitWeiboPost()">发送</div>
+        </div>
+        <textarea class="wb-post-textarea" id="wbPostInput" placeholder="分享新鲜事..."></textarea>
+        <!-- 图片预览区 -->
+        <div id="wbPostImagePreviewArea" style="padding: 0 20px 10px; display: flex; flex-wrap: wrap; gap: 10px;"></div>
+        <div class="wb-post-toolbar">
+            <svg onclick="openWbPostImageModal()" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <svg onclick="openWbPostAtModal()" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <svg onclick="openWbPostTopicModal()" viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+        </div>
+    </div>
+
+    <!-- 微博发帖：图片类型选择弹窗 -->
+    <div class="preset-modal-overlay" id="wbPostImageTypeModalOverlay" style="z-index: 10000;">
+        <div class="preset-modal" style="width: 260px;">
+            <div class="preset-modal-title">添加图片</div>
+            <div class="preset-list" style="width: 100%; margin-top: 10px;">
+                <div class="preset-item" onclick="triggerWbPostLocalImage()">
+                    <span class="preset-item-name" style="text-align: center; width: 100%;">上传本地图片</span>
+                </div>
+                <div class="preset-item" onclick="triggerWbPostDescImage()">
+                    <span class="preset-item-name" style="text-align: center; width: 100%;">文字描述图片</span>
+                </div>
+            </div>
+            <div class="preset-modal-actions">
+                <div class="preset-btn-cancel" onclick="closeWbPostImageModal()" style="width: 100%; border-right: none;">取消</div>
+            </div>
+        </div>
+    </div>
+    <input type="file" id="wbPostLocalImageInput" style="display: none;" accept="image/*" onchange="handleWbPostLocalImage(event)">
+
+    <!-- 微博发帖：文字描述图片输入弹窗 -->
+    <div class="preset-modal-overlay" id="wbPostDescImageModalOverlay" style="z-index: 10000;">
+        <div class="preset-modal" style="width: 280px;">
+            <div class="preset-modal-title">文字描述图片</div>
+            <textarea id="wbPostDescImageInput" style="width: 85%; height: 80px; margin: 15px 0; padding: 10px; border: 1px solid #eee; border-radius: 8px; resize: none; outline: none; font-size: 14px; background: #f9f9f9;" placeholder="描述图片画面..."></textarea>
+            <div class="preset-modal-actions">
+                <div class="preset-btn-cancel" onclick="closeWbPostDescImageModal()">取消</div>
+                <div class="preset-btn-confirm" onclick="confirmWbPostDescImage()">确定</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 微博发帖：@联系人弹窗 -->
+    <div class="preset-modal-overlay" id="wbPostAtModalOverlay" style="z-index: 10000;">
+        <div class="preset-modal" style="width: 300px; max-height: 70vh;">
+            <div class="preset-modal-title">@ 关注的人</div>
+            <div id="wbPostAtList" style="width: 100%; overflow-y: auto; padding: 10px 20px; display: flex; flex-direction: column; gap: 10px;">
+                <!-- 动态渲染 -->
+            </div>
+            <div class="preset-modal-actions">
+                <div class="preset-btn-cancel" onclick="closeWbPostAtModal()" style="width: 100%; border-right: none;">取消</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 微博发帖：插入话题弹窗 -->
+    <div class="preset-modal-overlay" id="wbPostTopicModalOverlay" style="z-index: 10000;">
+        <div class="preset-modal" style="width: 280px;">
+            <div class="preset-modal-title">插入话题</div>
+            <div id="wbPostTopicList" style="width: 100%; max-height: 150px; overflow-y: auto; padding: 10px 20px; display: flex; flex-direction: column; gap: 10px;"></div>
+            <input type="text" id="wbPostTopicInput" class="preset-modal-input" placeholder="输入话题名称 (无需加#)" style="width: 85%; margin-top: 5px;">
+            <div class="preset-modal-actions">
+                <div class="preset-btn-cancel" onclick="closeWbPostTopicModal()">取消</div>
+                <div class="preset-btn-confirm" onclick="confirmWbPostTopic()">确定</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 微博设置页面 -->
+    <div class="theme-panel instant-panel" id="weiboSettingsPanel" style="z-index: 160; background-color: #f4f4f5;">
+        <div class="panel-header">
+            <div class="header-close" onclick="closeWeiboSettings()" style="font-size: 15px;">BACK</div>
+            <div class="header-title-wrapper"><div class="header-title" style="cursor: default;">设置</div></div>
+            <div class="header-close" style="visibility: hidden;">DONE</div>
+        </div>
+        <div class="panel-content" style="padding: 20px;">
+            <!-- 关联世界书 -->
+            <div style="background: #fff; border-radius: 16px; overflow: hidden; border: 1px solid #eee; margin-bottom: 20px;">
+                <div onclick="openWeiboWbSelectModal()" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+                    <span style="font-size: 15px; color: #333; font-weight: bold;">关联世界书</span>
+                    <span id="weiboWbSelectText" style="font-size: 13px; color: #888;">未选择 <svg viewBox="0 0 24 24" width="16" height="16" stroke="#ccc" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
+                </div>
+            </div>
+
+            <!-- 切换账号 -->
+            <div style="background: #fff; border-radius: 16px; overflow: hidden; border: 1px solid #eee; margin-bottom: 20px;">
+                <div style="padding: 16px 20px; border-bottom: 1px solid #f5f5f5;">
+                    <span style="font-size: 15px; color: #333; font-weight: bold;">切换账号</span>
+                </div>
+                <div id="weiboSwitchAccountList" style="display: flex; flex-direction: column;">
+                    <!-- 动态渲染账号列表 -->
+                </div>
+            </div>
+
+            <div style="background: #fff; border-radius: 16px; overflow: hidden; border: 1px solid #eee;">
+                <div onclick="weiboLogout()" style="padding: 16px 20px; display: flex; justify-content: center; align-items: center; cursor: pointer;">
+                    <span style="font-size: 15px; color: #ff3b30; font-weight: bold;">退出当前账号</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 微博世界书选择弹窗 -->
+    <div class="preset-modal-overlay" id="weiboWbSelectModalOverlay" style="z-index: 400;">
+        <div class="preset-modal" style="width: 320px; max-height: 80vh; display: flex; flex-direction: column; border-radius: 20px; background: #fff; padding: 20px 15px;">
+            <div style="font-size: 16px; font-weight: bold; color: #555; text-align: center; margin-bottom: 15px;">绑定微博世界书</div>
+            
+            <div id="weiboWbSelectList" style="flex: 1; overflow-y: auto; width: 100%; text-align: left; margin-bottom: 15px;">
+                <!-- 动态渲染分组和条目 -->
+            </div>
+            
+            <div id="weiboWbSelectConfirmBtn" style="width: 100%; background: #f0f0f0; color: #333; text-align: center; padding: 12px 0; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer;" onclick="confirmWeiboWbSelect()">确认</div>
+        </div>
+    </div>
+
+    <!-- 微博首页生成设置弹窗 -->
+    <div class="preset-modal-overlay" id="weiboHomeGenModalOverlay" style="z-index: 500;">
+        <div class="preset-modal" style="width: 280px;">
+            <div class="preset-modal-title">生成微博数据</div>
+            <div style="width: 100%; padding: 15px 20px; display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; color: #333; font-weight: bold;">生成帖子数量</span>
+                    <input type="number" id="wbGenPostCount" value="3" style="width: 60px; text-align: center; border: 1px solid #eee; border-radius: 6px; padding: 4px; outline: none;">
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; color: #333; font-weight: bold;">每贴包含评论数</span>
+                    <input type="number" id="wbGenCommentCount" value="2" style="width: 60px; text-align: center; border: 1px solid #eee; border-radius: 6px; padding: 4px; outline: none;">
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; color: #333; font-weight: bold;">生成视频数量</span>
+                    <input type="number" id="wbGenVideoCount" value="1" style="width: 60px; text-align: center; border: 1px solid #eee; border-radius: 6px; padding: 4px; outline: none;">
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; color: #333; font-weight: bold;">视频评论数量</span>
+                    <input type="number" id="wbGenVideoCommentCount" value="856" style="width: 60px; text-align: center; border: 1px solid #eee; border-radius: 6px; padding: 4px; outline: none;">
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; color: #333; font-weight: bold;">生成热搜数量</span>
+                    <input type="number" id="wbGenHotCount" value="5" style="width: 60px; text-align: center; border: 1px solid #eee; border-radius: 6px; padding: 4px; outline: none;">
+                </div>
+            </div>
+            <div class="preset-modal-actions">
+                <div class="preset-btn-cancel" onclick="closeWeiboHomeGenModal()">取消</div>
+                <div class="preset-btn-confirm" onclick="generateWeiboPostAPI()">生成</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 微博超话生成设置弹窗 -->
+    <div class="preset-modal-overlay" id="weiboStGenModalOverlay" style="z-index: 500;">
+        <div class="preset-modal" style="width: 280px;">
+            <div class="preset-modal-title">生成超话帖子</div>
+            <div style="width: 100%; padding: 15px 20px; display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; color: #333; font-weight: bold;">生成帖子数量</span>
+                    <input type="number" id="wbStGenPostCount" value="3" style="width: 60px; text-align: center; border: 1px solid #eee; border-radius: 6px; padding: 4px; outline: none;">
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; color: #333; font-weight: bold;">每贴包含评论数</span>
+                    <input type="number" id="wbStGenCommentCount" value="2" style="width: 60px; text-align: center; border: 1px solid #eee; border-radius: 6px; padding: 4px; outline: none;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <span style="font-size: 13px; color: #333; font-weight: bold;">关联角色/面具 (多选)</span>
+                    <div id="wbStGenCharList" style="max-height: 120px; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 8px; background: #f9f9f9;">
+                        <!-- 动态渲染复选框 -->
+                    </div>
+                </div>
+            </div>
+            <div class="preset-modal-actions">
+                <div class="preset-btn-cancel" onclick="closeWeiboStGenModal()">取消</div>
+                <div class="preset-btn-confirm" onclick="generateWeiboSuperTopicPostsAPI()">生成</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 微博私信生成设置弹窗 -->
+    <div class="preset-modal-overlay" id="weiboMsgGenModalOverlay" style="z-index: 500;">
+        <div class="preset-modal" style="width: 280px;">
+            <div class="preset-modal-title">生成私信</div>
+            <div style="width: 100%; padding: 15px 20px; display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; color: #333; font-weight: bold;">生成私信会话数量</span>
+                    <input type="number" id="wbGenMsgCount" value="3" style="width: 60px; text-align: center; border: 1px solid #eee; border-radius: 6px; padding: 4px; outline: none;">
+                </div>
+                <div style="font-size: 11px; color: #888; line-height: 1.4; margin-top: 5px;">
+                    * 将自动读取您的面具人设、微博简介、身份、关联世界书以及最近发布的帖子和评论作为上下文生成私信。
+                </div>
+            </div>
+            <div class="preset-modal-actions">
+                <div class="preset-btn-cancel" onclick="closeWeiboMsgGenModal()">取消</div>
+                <div class="preset-btn-confirm" onclick="generateWeiboMessageAPI()">生成</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 微博私信聊天室全屏面板 -->
+    <div class="theme-panel instant-panel" id="weiboChatRoomPanel" style="z-index: 185; background-color: #f4f4f5;">
+        <div class="panel-header" style="background: #fff; border-bottom: 1px solid #f0f0f0;">
+            <div class="header-close" onclick="closeWeiboChatRoom()" style="font-size: 15px; color: #333;">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </div>
+            <div class="header-title-wrapper"><div class="header-title" id="wbChatRoomTitle" style="background: transparent; box-shadow: none; font-size: 16px; color: #111; padding: 0; transform: none;">私信</div></div>
+            <div class="header-close" style="visibility: hidden; width: 24px;"></div>
+        </div>
+        <div class="panel-content" style="padding: 0; display: flex; flex-direction: column;">
+            <div class="chat-room-history" id="wbChatRoomHistory" style="flex: 1; padding: 20px 15px; background: #f4f4f5;">
+                <!-- 动态渲染聊天记录 -->
+            </div>
+            <div class="chat-room-bottom-bar" style="background: #fff; border-top: 1px solid #eee; padding: 10px 15px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); display: flex; gap: 10px; align-items: center;">
+                <input type="text" id="wbChatRoomInput" placeholder="发消息..." style="flex: 1; background: #f4f4f4; border-radius: 20px; padding: 8px 15px; border: none; outline: none; font-size: 14px; color: #333;" onkeypress="if(event.key==='Enter') sendWeiboChatMessage()">
+                <div onclick="sendWeiboChatMessage()" style="color: #ff8200; font-size: 14px; font-weight: bold; cursor: pointer;">发送</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 微博编辑资料页面 -->
+    
+    <div class="theme-panel instant-panel" id="weiboEditProfilePanel" style="z-index: 160; background-color: #f4f4f5;">
+        <div class="panel-header">
+            <div class="header-close" onclick="closeWeiboEditProfile()" style="font-size: 15px;">取消</div>
+            <div class="header-title-wrapper"><div class="header-title" style="cursor: default;">编辑资料</div></div>
+            <div class="header-close" style="color: #111; font-size: 15px; font-weight: bold; cursor: pointer;" onclick="saveWeiboProfile()">保存</div>
+        </div>
+        <div class="panel-content" style="padding: 20px; align-items: center;">
+            <div id="wbEditAvatarPreview" onclick="document.getElementById('wbEditAvatarInput').click()" style="width: 80px; height: 80px; border-radius: 50%; background-color: #e0e0e0; background-size: cover; background-position: center; margin-bottom: 20px; cursor: pointer; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 12px; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">更换头像</div>
+            <input type="file" id="wbEditAvatarInput" accept="image/*" style="display: none;" onchange="handleWbEditAvatar(event)">
+            
+            <div style="width: 100%; background: #fff; border-radius: 16px; padding: 15px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 15px;">
+                <div style="display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                    <span style="font-size: 12px; color: #888; font-weight: bold;">微博名称</span>
+                    <input type="text" id="wbEditNameInput" style="border: none; outline: none; font-size: 15px; color: #111;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                    <span style="font-size: 12px; color: #888; font-weight: bold;">关注数 (留空为真实数据)</span>
+                    <input type="text" id="wbEditFollowCountInput" placeholder="如: 128" style="border: none; outline: none; font-size: 15px; color: #111;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                    <span style="font-size: 12px; color: #888; font-weight: bold;">粉丝数 (留空为真实数据)</span>
+                    <input type="text" id="wbEditFansCountInput" placeholder="如: 10.5万" style="border: none; outline: none; font-size: 15px; color: #111;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                    <span style="font-size: 12px; color: #888; font-weight: bold;">简介</span>
+                    <textarea id="wbEditBioInput" style="border: none; outline: none; font-size: 15px; color: #111; resize: none; height: 60px;"></textarea>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <span style="font-size: 12px; color: #888; font-weight: bold;">个人身份</span>
+                    <textarea id="wbEditPersonaInput" placeholder="详细描述该账号在微博上的人设、身份" style="border: none; outline: none; font-size: 15px; color: #111; resize: none; height: 80px;"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 微博关注/粉丝全屏面板 -->
+    <div class="theme-panel instant-panel" id="weiboFollowPanel" style="z-index: 165; background-color: #fff;">
+        <div class="panel-header" style="background: #fff; border-bottom: 1px solid #eee;">
+            <div class="header-close" onclick="closeWeiboFollowPanel()" style="font-size: 15px; color: #333;">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </div>
+            <div class="header-title-wrapper">
+                <div class="wb-nav-tabs" style="margin-top: 0; padding: 0;">
+                    <span id="wbFollowTab-follow" class="active" onclick="switchWeiboFollowTab('follow')">关注</span>
+                    <span id="wbFollowTab-fans" onclick="switchWeiboFollowTab('fans')">粉丝</span>
+                </div>
+            </div>
+            <div class="header-close" style="visibility: hidden; width: 24px;"></div>
+        </div>
+        <div class="panel-content" style="padding: 0; background: #fff; position: relative;">
+            <div id="weiboFollowList" style="display: flex; flex-direction: column; padding-bottom: 80px;">
+                <!-- 动态渲染关注/粉丝列表 -->
+            </div>            
+        </div>
+    </div>
+    <!-- 微博热搜详情全屏面板 (重构为沉浸式) -->
+    <div class="theme-panel instant-panel" id="weiboHotDetailPanel" style="z-index: 170; background-color: #fff;">
+        <!-- 沉浸式透明顶栏 -->
+        <div class="panel-header" style="background: transparent; border-bottom: none; position: absolute; top: 0; left: 0; right: 0; z-index: 10;">
+            <div class="header-close" onclick="closeWeiboHotDetail()" style="font-size: 15px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </div>
+            <div class="header-title-wrapper"></div>
+            <div class="header-close" style="color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); display: flex; gap: 15px; align-items: center;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" onclick="generateWeiboHotTopicPostsAPI()" style="cursor: pointer;"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 0 20.49 15"></path></svg>
+            </div>
+        </div>
+        
+        <div class="panel-content" style="padding: 0; overflow-y: auto;">
+            <!-- 热搜头部背景与信息 -->
+            <div class="wb-super-header-bg" id="wbHotHeaderBg">
+                <div class="wb-super-header-mask"></div>
+                <div class="wb-super-info-box">
+                    <div style="display: flex; gap: 12px; align-items: flex-end;">
+                        <div class="wb-super-avatar-large" id="wbHotAvatar"></div>
+                        <div style="flex: 1; padding-bottom: 4px;">
+                            <div class="wb-super-title-large" id="wbHotDetailTitle">#话题#</div>
+                            <div class="wb-super-stats-text" id="wbHotStats">阅读 1.2亿 · 讨论 3.4万</div>
+                        </div>
+                        <!-- 移除了参与/签到按钮 -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 移除了 Tab 栏 -->
+
+            <!-- 帖子流 (去除了 padding-top 缝隙) -->
+            <div class="wb-feed-list" id="wbHotDetailFeed" style="padding-top: 0; padding-bottom: 60px;">
+                <!-- 动态渲染热搜相关微博 -->
+            </div>
+        </div>
+        
+        <!-- 底部发帖输入框 -->
+        <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 1px solid #eee; padding: 10px 15px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 20;">
+            <div onclick="openWeiboPostPage()" style="background: #f4f4f4; border-radius: 20px; padding: 8px 15px; color: #888; font-size: 14px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                发一条微博参与讨论...
+            </div>
+        </div>
+    </div>
+
+    <!-- 微博超话社区全屏面板 -->
+    <div class="theme-panel instant-panel" id="weiboSuperTopicPanel" style="z-index: 175; background-color: #fff;">
+        <!-- 沉浸式透明顶栏 -->
+        <div class="panel-header" style="background: transparent; border-bottom: none; position: absolute; top: 0; left: 0; right: 0; z-index: 10;">
+            <div class="header-close" onclick="closeWeiboSuperTopic()" style="font-size: 15px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </div>
+            <div class="header-title-wrapper"></div>
+            <!-- 生成超话帖子按钮 -->
+            <div class="header-close" style="color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); display: flex; gap: 15px; align-items: center;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" onclick="openWeiboStGenModal()" style="cursor: pointer;"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            </div>
+        </div>
+       
+        <div class="panel-content" style="padding: 0; overflow-y: auto;">
+            <!-- 超话头部背景与信息 -->
+            <div class="wb-super-header-bg" id="wbSuperHeaderBg">
+                <div class="wb-super-header-mask"></div>
+                <div class="wb-super-info-box">
+                    <div style="display: flex; gap: 12px; align-items: flex-end;">
+                        <div class="wb-super-avatar-large" id="wbSuperAvatar"></div>
+                        <div style="flex: 1; padding-bottom: 4px;">
+                            <div class="wb-super-title-large" id="wbSuperTitle">超话名称</div>
+                            <div class="wb-super-stats-text" id="wbSuperStats">阅读 1.2亿 · 帖子 3.4万 · 粉丝 12万</div>
+                        </div>
+                        <!-- 将编辑和签到按键垂直排列 -->
+                        <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                            <div class="wb-super-sign-btn" onclick="openWeiboEditSuperTopic()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); color: #fff; border: 1px solid rgba(255,255,255,0.3); box-shadow: none;">编辑</div>
+                            <div class="wb-super-sign-btn">签到</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 超话 Tab 栏 -->
+            <div class="wb-super-tabs">
+                <div class="wb-super-tab active">全部</div>
+                <div class="wb-super-tab">精华</div>
+                <div class="wb-super-tab">热门</div>
+                <div class="wb-super-tab">相册</div>
+            </div>
+
+            <!-- 超话帖子流 (去除了 padding-top 缝隙) -->
+            <div class="wb-feed-list" id="wbSuperFeed" style="padding-top: 0; padding-bottom: 60px;">
+                <!-- 动态渲染超话帖子 -->
+            </div>
+        </div>
+        
+        <!-- 底部发帖输入框 -->
+        <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 1px solid #eee; padding: 10px 15px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 20;">
+            <div onclick="openWeiboPostPage()" style="background: #f4f4f4; border-radius: 20px; padding: 8px 15px; color: #888; font-size: 14px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                在超话里发帖...
+            </div>
+        </div>
+    </div>
+
     <!-- =========================================
          新增：Call APP 全屏面板
          ========================================= -->
@@ -5573,7 +6303,7 @@
                 <div class="call-contact-number" id="callContactNumber">Number</div>
 
                 <div class="call-contact-actions">
-                    <div class="call-contact-action-btn" onclick="alert('跳转到发消息')">
+                    <div class="call-contact-action-btn" onclick="jumpToSmsFromCall()">
                         <div class="call-contact-action-icon"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></div>
                         <span>信息</span>
                     </div>
@@ -5728,13 +6458,254 @@
                 <div class="call-mini-time" id="callMiniTime">00:00</div>
             </div>
         </div>
+    </div> <!-- 👈 关键修复：这里补上 Call APP 面板缺失的闭合标签 -->
+    <!-- =========================================
+         新增：短信 APP 全屏面板
+         ========================================= -->
+    <div class="theme-panel instant-panel" id="smsAppPanel" style="z-index: 155; background-color: #fff; padding: 0;">
+        
+        <!-- QQ 侧边栏 (账号切换) -->
+        <div class="sms-sidebar-overlay" id="smsSidebarOverlay" onclick="closeSmsSidebar()">
+            <div class="sms-sidebar" onclick="event.stopPropagation()">
+                <div class="sms-sidebar-header">
+                    <div class="sms-sidebar-current-user">
+                        <div class="sms-sidebar-avatar" id="smsCurrentSidebarAvatar"></div>
+                        <div class="sms-sidebar-name" id="smsCurrentSidebarName">未登录</div>
+                    </div>
+                </div>
+                <div class="sms-account-list" id="smsSidebarAccountList">
+                    <div class="sms-account-title">切换账号</div>
+                    <!-- JS 动态渲染账号列表 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 新建会话弹窗 -->
+        <div class="sms-new-chat-overlay" id="smsNewChatOverlay" onclick="closeSmsNewChatModal()">
+            <div class="sms-new-chat-sheet" onclick="event.stopPropagation()">
+                <div class="sms-sheet-header">
+                    <div style="width: 40px;"></div>
+                    <div class="sms-sheet-title">新信息</div>
+                    <div class="sms-sheet-cancel" onclick="closeSmsNewChatModal()">取消</div>
+                </div>
+                <div class="sms-new-chat-search">
+                    <span>收件人:</span>
+                    <input type="text" id="smsNewChatSearchInput" placeholder="搜索联系人" oninput="renderSmsNewChatList()">
+                </div>
+                <div class="sms-sheet-list" id="smsNewChatList">
+                    <!-- JS 动态渲染联系人列表 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 身份切换弹窗 (iOS 风格) -->
+        <div class="sms-identity-modal-overlay" id="smsIdentityModalOverlay">
+            <div class="sms-identity-modal">
+                <div class="sms-id-modal-header">选择发送身份</div>
+                <div class="sms-id-modal-list">
+                    <div class="sms-id-modal-item selected" data-id="me" onclick="selectSmsIdentity(this)">我 (iMessage)</div>
+                    <div class="sms-id-modal-item" data-id="10086" onclick="selectSmsIdentity(this)">10086</div>
+                    <div class="sms-id-modal-item" data-id="custom" onclick="selectSmsIdentity(this)">自定义...</div>
+                </div>
+                <div class="sms-id-custom-input-wrap" id="smsIdCustomInputWrap">
+                    <input type="text" id="smsIdCustomInput" placeholder="输入伪装名称">
+                </div>
+                <div class="sms-id-modal-footer">
+                    <div class="sms-id-modal-btn cancel" onclick="closeSmsIdentityModal()">取消</div>
+                    <div class="sms-id-modal-btn confirm" onclick="confirmSmsIdentity()">确定</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QQ 风格列表页 -->
+        <div class="sms-page sms-list-page" id="smsListPage">
+            <div class="sms-qq-header">
+                <div class="sms-qq-back-btn" onclick="closeSmsApp()">BACK</div>
+                <div class="sms-qq-title-area" onclick="openSmsSidebar()">
+                    <div class="sms-qq-user-avatar-small" id="smsMainAvatar"></div>
+                    <div class="sms-qq-title" id="smsMainTitle">未登录 ▾</div>
+                </div>
+                <div class="sms-qq-add-btn" onclick="openSmsNewChatModal()">
+                    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </div>
+            </div>
+            <div class="sms-qq-search-bar">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="smsListSearchInput" placeholder="搜索" oninput="renderSmsList()">
+            </div>
+            <div class="sms-msg-list" id="smsMessageList">
+                <!-- JS 动态渲染短信列表 -->
+            </div>
+        </div>
+
+        <!-- iOS Message 风格聊天页 -->
+        <div class="sms-page hidden" id="smsChatPage">
+            <div class="sms-ios-header">
+                <div class="sms-ios-back" onclick="closeSmsChat()">
+                    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    <span style="font-size: 16px; margin-left: -4px;" id="smsUnreadCountBack"></span>
+                </div>
+                <div class="sms-ios-title-area">
+                    <div class="sms-ios-avatar-small" id="smsChatAvatar"></div>
+                    <div class="sms-ios-name" id="smsChatTitle">Char</div>
+                </div>
+                <!-- 右上角设置按钮 (更换为更精致的详情图标) -->
+                <div class="sms-ios-right-btn" onclick="openSmsSettingsPanel()" style="cursor: pointer; justify-content: flex-end;">
+                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="#111" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                </div>
+            </div>
+            
+            <div class="sms-chat-history" id="smsChatHistory">
+                <!-- JS 动态渲染聊天记录 -->
+            </div>
+
+            <div class="sms-ios-bottom-area">
+                <!-- +号弹出的菜单 -->
+                <div class="sms-plus-menu" id="smsPlusMenu">
+                    <div class="sms-menu-item" onclick="smsRollBack()">
+                        <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
+                        <span>重 Roll</span>
+                    </div>
+                    <div class="sms-menu-item" onclick="openSmsIdentityModal()">
+                        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span>切换身份</span>
+                    </div>
+                </div>
+
+                <div class="sms-ios-input-row">
+                    <div class="sms-ios-add-btn" id="smsPlusBtn" onclick="toggleSmsPlusMenu(event)">
+                        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </div>
+                    <div class="sms-ios-input-wrapper">
+                        <div class="sms-ios-input-box" id="smsMsgInput" contenteditable="true" oninput="checkSmsInput()" onclick="closeSmsPlusMenu()"></div>
+                        <!-- AI 回复键 (内部右侧) -->
+                        <div class="sms-ios-ai-btn" onclick="triggerSmsAiReply()" title="AI 回复">
+                            <svg viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
+                        </div>
+                    </div>
+                    <!-- 发送键 (外部右侧) -->
+                    <div class="sms-ios-send-btn-outer" id="smsSendBtn" onclick="sendSmsMessage()">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="19" x2="12" y2="5"></line>
+                            <polyline points="5 12 12 5 19 12"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新增：短信设置全屏面板 (重构版) -->
+        <div class="theme-panel instant-panel" id="smsSettingsPage" style="z-index: 160; background-color: #f2f2f7; padding: 0; display: none;">
+            <div class="panel-header" style="background: #f2f2f7; border-bottom: none;">
+                <div class="header-close" onclick="closeSmsSettingsPanel()" style="font-size: 15px; color: #111;">BACK</div>
+                <div class="header-title-wrapper"><div class="header-title" style="background: transparent; box-shadow: none; font-size: 16px; color: #111;">详细信息</div></div>
+                <div class="header-close" style="visibility: hidden;">DONE</div>
+            </div>
+            <div class="panel-content" style="padding: 20px; align-items: center;">
+                <!-- 上半部分：头像和名字 -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 20px; margin-bottom: 40px;">
+                    <div id="smsSettingsAvatar" style="width: 80px; height: 80px; border-radius: 50%; background-color: #ccc; background-size: cover; background-position: center; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 30px; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.05);"></div>
+                    <div id="smsSettingsName" style="font-size: 20px; font-weight: bold; color: #111;">Name</div>
+                </div>
+                
+                <!-- 下半部分：操作按钮 -->
+                <div style="width: 100%; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                    <div onclick="clearSmsHistory()" style="padding: 16px 20px; border-bottom: 1px solid #f5f5f5; color: #ff3b30; font-size: 16px; cursor: pointer; text-align: center;">清空聊天记录</div>
+                    <div onclick="deleteSmsSession()" style="padding: 16px 20px; color: #ff3b30; font-size: 16px; cursor: pointer; text-align: center; font-weight: bold;">删除此会话</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新增：长按气泡菜单 -->
+        <div class="sms-bubble-menu-overlay" id="smsBubbleMenuOverlay" onclick="closeSmsBubbleMenu()">
+            <div class="sms-bubble-menu" id="smsBubbleMenu" onclick="event.stopPropagation()">
+                <div class="sms-bubble-menu-item" onclick="actionSmsEditMessage()">编辑</div>
+                <div class="sms-bubble-menu-item danger" onclick="actionSmsDeleteMessage()">删除</div>
+            </div>
+        </div>
+
+        <!-- 新增：编辑消息弹窗 -->
+        <div class="sms-edit-modal-overlay" id="smsEditModalOverlay">
+            <div class="sms-edit-modal">
+                <div class="sms-edit-header">编辑消息</div>
+                <div class="sms-edit-body">
+                    <textarea id="smsEditTextarea" class="sms-edit-textarea"></textarea>
+                </div>
+                <div class="sms-edit-footer">
+                    <div class="sms-edit-btn cancel" onclick="closeSmsEditModal()">取消</div>
+                    <div class="sms-edit-btn confirm" onclick="saveSmsEditedMessage()">保存</div>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- 👈 闭合 smsAppPanel -->
+    <!-- 微博创建超话全屏面板 (ins韩系粗线条风) -->
+    <div class="theme-panel instant-panel" id="weiboCreateSuperTopicPanel" style="z-index: 180; background-color: #fafafa;">
+        <div class="panel-header" style="background: #fff; border-bottom: 2px solid #f0f0f0;">
+            <div class="header-close" onclick="closeWeiboCreateSuperTopic()" style="font-size: 15px; color: #222; font-weight: bold;">取消</div>
+            <div class="header-title-wrapper"><div class="header-title" id="wbCreateStPanelTitle" style="cursor: default; background: transparent; box-shadow: none; font-size: 16px; color: #222; transform: none; padding: 0;">创建超话</div></div>
+            <div class="header-close" style="color: #222; font-size: 15px; font-weight: bold; cursor: pointer;" onclick="confirmCreateWeiboSuperTopic()">创建</div>
+        </div>
+        <div class="panel-content" style="padding: 20px; align-items: center; background: #fafafa;">
+            
+            <!-- 顶部横向布局：左侧背景，右侧信息 -->
+            <div style="display: flex; width: 100%; gap: 15px; margin-bottom: 20px; align-items: flex-start;">
+                
+                <!-- 左侧：背景图上传区 (100x100) 增加 margin-top 下移 -->
+                <div id="wbCreateStBgPreview" onclick="document.getElementById('wbCreateStBgLocal').click()" style="width: 100px; height: 100px; margin-top: 18px; flex-shrink: 0; border-radius: 16px; background-color: #fff; border: 2px dashed #d6d6d6; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; background-size: cover; background-position: center; transition: border-color 0.2s; box-sizing: border-box;">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="#aaa" stroke-width="2" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <span style="font-size: 11px; color: #999; font-weight: bold; margin-top: 6px; text-align: center;">设置背景</span>
+                </div>
+                <input type="file" id="wbCreateStBgLocal" accept="image/*" style="display: none;" onchange="handleWbCreateStBgLocal(event)">
+
+                <!-- 右侧：名称与数据 -->
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0;">
+                    <!-- 超话名称 -->
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 12px; font-weight: 800; color: #222; padding-left: 4px;">超话名称</label>
+                        <!-- 减小 padding 降低高度 -->
+                        <input type="text" id="wbCreateStName" placeholder="例如：极简生活" style="width: 100%; background: #fff; border: 2px solid #ebebeb; border-radius: 12px; padding: 8px 12px; font-size: 14px; color: #222; font-weight: 600; outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='#222'" onblur="this.style.borderColor='#ebebeb'">
+                    </div>
+                    
+                    <!-- 帖子数和粉丝数 -->
+                    <div style="display: flex; gap: 10px; width: 100%;">
+                        <div style="display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0;">
+                            <label style="font-size: 12px; font-weight: 800; color: #222; padding-left: 4px;">帖子数</label>
+                            <!-- 减小 padding 降低高度 -->
+                            <input type="text" id="wbCreateStPosts" placeholder="如: 1.2万" style="width: 100%; background: #fff; border: 2px solid #ebebeb; border-radius: 12px; padding: 8px 12px; font-size: 14px; color: #222; font-weight: 600; outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='#222'" onblur="this.style.borderColor='#ebebeb'">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0;">
+                            <label style="font-size: 12px; font-weight: 800; color: #222; padding-left: 4px;">粉丝数</label>
+                            <!-- 减小 padding 降低高度 -->
+                            <input type="text" id="wbCreateStFans" placeholder="如: 89万" style="width: 100%; background: #fff; border: 2px solid #ebebeb; border-radius: 12px; padding: 8px 12px; font-size: 14px; color: #222; font-weight: 600; outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='#222'" onblur="this.style.borderColor='#ebebeb'">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 下方：超话简介 -->
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; margin-bottom: 15px;">
+                <label style="font-size: 13px; font-weight: 800; color: #222; padding-left: 4px;">超话简介 (世界观补充)</label>
+                <textarea id="wbCreateStDesc" placeholder="详细介绍这个超话的背景设定与世界观..." style="width: 100%; height: 160px; background: #fff; border: 2px solid #ebebeb; border-radius: 12px; padding: 14px 16px; font-size: 15px; color: #222; font-weight: 600; outline: none; resize: none; line-height: 1.5; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='#222'" onblur="this.style.borderColor='#ebebeb'"></textarea>
+            </div>
+
+            <!-- 关联世界书 -->
+            <div style="width: 100%; background: #fff; border-radius: 12px; border: 2px solid #ebebeb; overflow: hidden; box-sizing: border-box;">
+                <div onclick="openStWbSelectModal()" style="padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+                    <span style="font-size: 13px; font-weight: 800; color: #222;">关联世界书</span>
+                    <span id="wbCreateStWbText" style="font-size: 12px; color: #888; font-weight: 600;">未选择 <svg viewBox="0 0 24 24" width="14" height="14" stroke="#ccc" stroke-width="2" fill="none" style="vertical-align: middle;"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
+                </div>
+            </div>
+            
+        </div>
+    </div>
 
     <!-- 隐藏的上传输入框 -->
     <input type="file" id="wallpaperUploadInput" accept="image/*" style="display: none;" onchange="handleWallpaperUpload(event)">
     <input type="file" id="iconUploadInput" accept="image/*" style="display: none;" onchange="handleIconUpload(event)">
     <input type="file" id="widgetBgUploadInput" accept="image/*" style="display: none;" onchange="handleWidgetBgUpload(event)">
-</div>
-</div>
+</div> <!-- 👈 闭合 iphone-container -->
+
     <script>
 // PWA Service Worker Registration
         if ('serviceWorker' in navigator) {
@@ -5759,6 +6730,8 @@
 <script src="phoneCheck.js"></script>
 <script src="mall.js"></script>
 <script src="call.js"></script>
+<script src="sms.js"></script>
+<script src="weibo.js"></script>
 <!-- 引入 Supabase 核心库 -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <!-- 引入独立的激活码验证逻辑 -->

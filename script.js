@@ -1751,8 +1751,8 @@ function captureFullState() {
         apps: {},
         texts: Array.from(document.querySelectorAll('[contenteditable="true"]')).map(el => el.innerText)
     };
-    for (let i = 1; i <= 8; i++) {
-        let appId = i === 5 ? 'app-dock1' : (i === 6 ? 'app-dock-music' : (i === 7 ? 'app-mall' : (i === 8 ? 'app-dock-call' : `app${i}`)));
+    for (let i = 1; i <= 10; i++) {
+        let appId = i === 5 ? 'app-dock1' : (i === 6 ? 'app-dock-music' : (i === 7 ? 'app-mall' : (i === 8 ? 'app-dock-call' : (i === 9 ? 'app-dock-sms' : (i === 10 ? 'app-weibo' : `app${i}`)))));
         state.apps[appId] = {
             icon: document.getElementById(`icon-${appId}`).style.backgroundImage,
             name: document.getElementById(`name-${appId}`).innerText
@@ -1819,8 +1819,8 @@ function applyFullState(state) {
         });
     }
     
-    for (let i = 1; i <= 8; i++) {
-        let appId = i === 5 ? 'app-dock1' : (i === 6 ? 'app-dock-music' : (i === 7 ? 'app-mall' : (i === 8 ? 'app-dock-call' : `app${i}`)));
+    for (let i = 1; i <= 10; i++) {
+        let appId = i === 5 ? 'app-dock1' : (i === 6 ? 'app-dock-music' : (i === 7 ? 'app-mall' : (i === 8 ? 'app-dock-call' : (i === 9 ? 'app-dock-sms' : (i === 10 ? 'app-weibo' : `app${i}`)))));
         const appData = state.apps[appId];
         if (appData) {
             const appIconEl = document.getElementById(`icon-${appId}`);
@@ -1900,7 +1900,9 @@ async function confirmResetDefault() {
             { id: 'app-mall', name: 'Shopping' },
             { id: 'app-dock1', name: 'Chars' },
             { id: 'app-dock-music', name: 'Music' },
-            { id: 'app-dock-call', name: 'Call' }
+            { id: 'app-dock-call', name: 'Call' },
+            { id: 'app-dock-sms', name: 'message' },
+            { id: 'app-weibo', name: 'Weibo' }
         ];
 
         defaultApps.forEach(app => {
