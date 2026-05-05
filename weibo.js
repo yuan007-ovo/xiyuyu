@@ -2,6 +2,25 @@
 // Weibo APP 专属逻辑 (weibo.js)
 // ==========================================
 
+const NPC_AVATARS = [
+    "https://i.postimg.cc/HnZ5jWr9/IMG-20260320-102001.jpg",
+    "https://i.postimg.cc/W3p2Sp7s/Image-1771759277167-924.jpg",
+    "https://i.postimg.cc/26HCtpHm/Image-1771583312811-653.jpg",
+    "https://i.postimg.cc/Px6d7G6T/Image-1771583329136-980.jpg",
+    "https://i.postimg.cc/cLyBThqx/mmexport1769155014910.jpg",
+    "https://i.postimg.cc/SxFfVrB1/Image-1769156350487-536.jpg",
+    "https://i.postimg.cc/htW1MsFS/Image-1769156011072-571.jpg",
+    "https://i.postimg.cc/MKq0P42L/mmexport1768319124859.jpg",
+    "https://i.postimg.cc/0NQkLzyW/mmexport1747984914914.jpg",
+    "https://i.postimg.cc/vmBYp4Z2/mmexport1766595771777.jpg",
+    "https://i.postimg.cc/MG1H1xGq/mmexport1766982624480.jpg",
+    "https://i.postimg.cc/yYrDHvG5/mmexport1766982633245.jpg"
+];
+
+function getRandomNpcAvatar() {
+    return NPC_AVATARS[Math.floor(Math.random() * NPC_AVATARS.length)];
+}
+
 // 封装统一的大模型调用函数
 async function callLLM(prompt) {
     const apiConfig = JSON.parse(ChatDB.getItem('current_api_config') || '{}');
@@ -796,7 +815,7 @@ ${wbText}
         let existingSessions = JSON.parse(ChatDB.getItem(`weibo_messages_${currentLoginId}`) || '[]');
 
         data.sessions.forEach(session => {
-            let targetAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${session.targetName}`;
+            let targetAvatar = getRandomNpcAvatar();
             let npc = weiboNpcs.find(n => n.name === session.targetName);
             if (!npc) {
                 npc = {
@@ -828,6 +847,7 @@ ${wbText}
 
         hideToast();
         showToast('生成成功！', 'success');
+        setTimeout(() => hideToast(), 2000);
         renderWeiboMessageList();
     } catch (e) {
         hideToast();
@@ -1216,29 +1236,62 @@ function renderWeiboVideoFeed() {
                 <div class="wb-video-cover-bg" style="background-image: url('${randomCover}');"></div>
                 <div class="wb-video-overlay-gradient"></div>
                 
-                <div class="wb-video-center-play">
-                    <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <!-- 中间显示视频画面描述，替换掉原来的大播放按钮 -->
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); padding: 20px; border-radius: 16px; text-align: center; z-index: 5; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 8px; font-weight: bold; letter-spacing: 2px;">[ 视频画面 ]</div>
+                    <div style="font-size: 15px; color: #fff; line-height: 1.6;">${v.desc || '暂无描述'}</div>
                 </div>
 
-                <div class="wb-video-right-actions" style="bottom: 100px;">
+                <!-- 右侧操作栏上移到 120px，防止和底部文字重叠 -->
+                <div class="wb-video-right-actions" style="bottom: 120px; z-index: 10;">
                     <div class="wb-video-avatar" style="background-image: url('${v.authorAvatar || ''}'); background-size: cover;"></div>
                     <div class="wb-video-action" onclick="toggleWeiboLike(this)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="wb-like-count">${v.likes || '1.2w'}</span></div>
-                    <div class="wb-video-action" onclick="openWbVideoComments('${v.comments || 856}')"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>${v.comments || 856}</div>
+                    <div class="wb-video-action" onclick="openWbVideoComments('${v.id}')"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>${v.comments || 856}</div>
                     <div class="wb-video-action"><svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>转发</div>
                 </div>
-                <div class="wb-video-info" style="margin-bottom: 20px; padding: 0 15px;">
+                
+                <!-- 底部信息区增加 margin-bottom 到 90px，完美避开底栏遮挡 -->
+                <div class="wb-video-info" style="margin-bottom: 90px; padding: 0 15px; position: relative; z-index: 10;">
                     <div class="wb-video-username">${v.authorName || '@未知'}</div>
-                    <div class="wb-video-desc">${v.desc || '暂无描述'}</div>
+                    <div class="wb-video-desc" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${v.desc || '暂无描述'}</div>
                 </div>
             </div>
         `;
     }
 }
 
-function openWbVideoComments(count) {
-    document.getElementById('wbVideoCommentsCount').innerText = `${count} 条评论`;
-    const overlay = document.getElementById('wbVideoCommentsOverlay');
+function openWbVideoComments(videoId) {
+    let videos = JSON.parse(ChatDB.getItem('weibo_videos') || '[]');
+    const v = videos.find(vid => vid.id === videoId);
+    if (!v) return;
+
+    document.getElementById('wbVideoCommentsCount').innerText = `${v.comments || 0} 条评论`;
+    
     const sheet = document.getElementById('wbVideoCommentsSheet');
+    const listContainer = sheet.children[1];
+    listContainer.innerHTML = '';
+
+    if (!v.commentsList || v.commentsList.length === 0) {
+        listContainer.innerHTML = '<div style="text-align: center; color: #888; font-size: 12px; padding: 20px;">暂无评论</div>';
+    } else {
+        v.commentsList.forEach(c => {
+            const item = document.createElement('div');
+            item.style.display = 'flex';
+            item.style.gap = '10px';
+            item.style.marginBottom = '15px';
+            item.innerHTML = `
+                <div style="width: 32px; height: 32px; border-radius: 50%; background-image: url('${c.authorAvatar}'); background-size: cover; background-position: center; flex-shrink: 0;"></div>
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                    <div style="font-size: 13px; color: #576b95; font-weight: bold;">${c.authorName}</div>
+                    <div style="font-size: 14px; color: #333; line-height: 1.5;">${c.content}</div>
+                    <div style="font-size: 11px; color: #aaa;">刚刚</div>
+                </div>
+            `;
+            listContainer.appendChild(item);
+        });
+    }
+
+    const overlay = document.getElementById('wbVideoCommentsOverlay');
     overlay.style.display = 'flex';
     setTimeout(() => {
         sheet.style.transform = 'translateY(0)';
@@ -1410,7 +1463,7 @@ ${charsText}
 
 请生成以下内容：
 1. ${postCount}条普通微博 (posts)，内容必须是关于【关注的角色列表】的讨论、动态或互动。发帖人可以是随机生成的网友、粉丝，也可以是角色本人。每条微博包含 ${commentCount} 条评论 (commentsList)。
-2. ${videoCount}条微博视频 (videos)，包含描述和各项数据，评论数请设定为 ${videoCommentCount} 左右。
+2. ${videoCount}条微博视频 (videos)，包含描述和各项数据，评论数请设定为 ${videoCommentCount} 左右，并生成 ${commentCount} 条评论 (commentsList)。
 3. ${hotCount}条微博热搜 (hotTopics)，需符合世界书背景，tag可选"热","新","沸"或空。
 
 必须返回严格的 JSON 格式，不要有任何 markdown 标记，格式如下：
@@ -1427,7 +1480,15 @@ ${charsText}
         }
     ],
     "videos": [
-        { "authorName": "发帖人网名", "desc": "视频描述", "likes": "1.2w", "comments": ${videoCommentCount} }
+        { 
+            "authorName": "发帖人网名", 
+            "desc": "视频描述", 
+            "likes": "1.2w", 
+            "comments": ${videoCommentCount},
+            "commentsList": [
+                { "authorName": "评论人网名", "content": "评论内容" }
+            ]
+        }
     ],
     "hotTopics": [
         { "title": "热搜标题", "meta": "123万", "tag": "热" }
@@ -1447,7 +1508,7 @@ ${charsText}
             p.time = Date.now();
             if (!p.commentsList) p.commentsList = [];
             p.commentsList.forEach(c => {
-                c.authorAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${c.authorName}`;
+                c.authorAvatar = getRandomNpcAvatar();
                 c.time = Date.now();
             });
             
@@ -1465,7 +1526,7 @@ ${charsText}
                     npc = {
                         id: 'npc_' + Date.now() + Math.floor(Math.random() * 1000),
                         name: p.authorName,
-                        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.authorName}`,
+                        avatarUrl: getRandomNpcAvatar(),
                         description: '微博网友'
                     };
                     weiboNpcs.push(npc);
@@ -1476,6 +1537,12 @@ ${charsText}
         });
         
         data.videos.forEach(v => {
+            v.id = 'video_' + Date.now() + Math.floor(Math.random() * 1000);
+            if (!v.commentsList) v.commentsList = [];
+            v.commentsList.forEach(c => {
+                c.authorAvatar = getRandomNpcAvatar();
+                c.time = Date.now();
+            });
             const char = allChars.find(c => c.netName === v.authorName || c.name === v.authorName);
             if (char) {
                 v.authorAvatar = char.avatarUrl;
@@ -1486,7 +1553,7 @@ ${charsText}
                     npc = {
                         id: 'npc_' + Date.now() + Math.floor(Math.random() * 1000),
                         name: v.authorName,
-                        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${v.authorName}`,
+                        avatarUrl: getRandomNpcAvatar(),
                         description: '微博网友'
                     };
                     weiboNpcs.push(npc);
@@ -1508,6 +1575,7 @@ ${charsText}
 
         hideToast();
         showToast('生成成功！', 'success');
+        setTimeout(() => hideToast(), 2000);
         initWeiboData(); // 刷新界面
     } catch (e) {
         hideToast();
@@ -1554,6 +1622,7 @@ ${wbText}
 
         hideToast();
         showToast('生成成功！', 'success');
+        setTimeout(() => hideToast(), 2000);
         initWeiboDiscoverSuperTopics();
     } catch (e) {
         hideToast();
@@ -1669,7 +1738,7 @@ ${associatedText}
             p.time = Date.now();
             if (!p.commentsList) p.commentsList = [];
             p.commentsList.forEach(c => {
-                c.authorAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${c.authorName}`;
+                c.authorAvatar = getRandomNpcAvatar();
                 c.time = Date.now();
             });
 
@@ -1683,7 +1752,7 @@ ${associatedText}
                     npc = {
                         id: 'npc_' + Date.now() + Math.floor(Math.random() * 1000),
                         name: p.authorName,
-                        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.authorName}`,
+                        avatarUrl: getRandomNpcAvatar(),
                         description: '微博网友'
                     };
                     weiboNpcs.push(npc);
@@ -1708,6 +1777,7 @@ ${associatedText}
 
         hideToast();
         showToast('生成成功！', 'success');
+        setTimeout(() => hideToast(), 2000);
         renderWeiboMockFeed('wbSuperFeed', topicName);
     } catch (e) {
         hideToast();
@@ -1734,7 +1804,7 @@ async function generateWeiboHotTopicPostsAPI() {
         
         data.posts.forEach(p => {
             p.id = 'post_' + Date.now() + Math.floor(Math.random() * 1000);
-            p.authorAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.authorName}`;
+            p.authorAvatar = getRandomNpcAvatar();
             p.time = Date.now();
         });
 
@@ -1744,6 +1814,7 @@ async function generateWeiboHotTopicPostsAPI() {
 
         hideToast();
         showToast('生成成功！', 'success');
+        setTimeout(() => hideToast(), 2000);
         renderWeiboMockFeed('wbHotDetailFeed', topicName);
     } catch (e) {
         hideToast();
@@ -2278,7 +2349,7 @@ ${existingCommentsText}
         if (!post.commentsList) post.commentsList = [];
         
         data.comments.forEach(c => {
-            c.authorAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${c.authorName}`;
+            c.authorAvatar = getRandomNpcAvatar();
             c.time = Date.now();
             post.commentsList.push(c);
         });
