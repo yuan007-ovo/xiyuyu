@@ -2,6 +2,33 @@
 // Weibo APP 专属逻辑 (weibo.js)
 // ==========================================
 
+// 微博专属 Loading 控制
+function showWeiboLoading(text = '正在生成内容...') {
+    const overlay = document.getElementById('weiboLoadingOverlay');
+    const textEl = document.getElementById('weiboLoadingText');
+    if (overlay && textEl) {
+        textEl.innerText = text;
+        overlay.classList.add('show');
+    }
+}
+
+function hideWeiboLoading() {
+    const overlay = document.getElementById('weiboLoadingOverlay');
+    if (overlay) overlay.classList.remove('show');
+}
+
+// 微博专属 Toast 提示
+function showWeiboToast(msg) {
+    const toast = document.getElementById('globalToast');
+    if (toast) {
+        document.getElementById('toastText').innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+    } else {
+        alert(msg);
+    }
+}
+
 // 获取微博专属资料
 function getWeiboProfile(accountId) {
     let profile = JSON.parse(ChatDB.getItem('weibo_profile_' + accountId) || 'null');
@@ -704,6 +731,11 @@ async function generateWeiboMessageAPI() {
     const currentLoginId = ChatDB.getItem('weibo_current_account');
     if (!currentLoginId) return alert('请先登录微博！');
 
+    const apiConfig = JSON.parse(ChatDB.getItem('current_api_config') || '{}');
+    if (!apiConfig.url || !apiConfig.key || !apiConfig.model) {
+        return alert('请先在设置中配置 API 信息！');
+    }
+
     const msgCount = document.getElementById('wbGenMsgCount').value || 3;
     closeWeiboMsgGenModal();
 
@@ -758,9 +790,25 @@ ${wbText}
     ]
 }`;
 
-    showGlobalToast('正在生成私信...', 'loading');
+    showWeiboLoading('正在生成私信...');
     try {
-        const res = await callLLM(prompt);
+        const response = await fetch(`${apiConfig.url.replace(/\/$/, '')}/chat/completions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiConfig.key}`
+            },
+            body: JSON.stringify({
+                model: apiConfig.model,
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.8
+            })
+        });
+
+        if (!response.ok) throw new Error('API 请求失败');
+        const resData = await response.json();
+        let res = resData.choices[0].message.content.trim();
+        res = res.replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();
         const data = JSON.parse(res);
         
         let weiboNpcs = JSON.parse(ChatDB.getItem('weibo_npcs') || '[]');
@@ -797,11 +845,11 @@ ${wbText}
         ChatDB.setItem('weibo_npcs', JSON.stringify(weiboNpcs));
         ChatDB.setItem(`weibo_messages_${currentLoginId}`, JSON.stringify(existingSessions));
 
-        hideGlobalToast();
-        showGlobalToast('生成成功！', 'success');
+        hideWeiboLoading();
+        showWeiboToast('生成成功！');
         renderWeiboMessageList();
     } catch (e) {
-        hideGlobalToast();
+        hideWeiboLoading();
         alert('生成失败：' + e.message);
     }
 }
@@ -1338,6 +1386,11 @@ async function generateWeiboPostAPI() {
     const currentLoginId = ChatDB.getItem('weibo_current_account');
     if (!currentLoginId) return alert('请先登录微博！');
 
+    const apiConfig = JSON.parse(ChatDB.getItem('current_api_config') || '{}');
+    if (!apiConfig.url || !apiConfig.key || !apiConfig.model) {
+        return alert('请先在设置中配置 API 信息！');
+    }
+
     const postCount = document.getElementById('wbGenPostCount').value || 3;
     const commentCount = document.getElementById('wbGenCommentCount').value || 2;
     const videoCount = document.getElementById('wbGenVideoCount').value || 1;
@@ -1405,9 +1458,25 @@ ${charsText}
     ]
 }`;
 
-    showGlobalToast('正在生成微博数据...', 'loading');
+    showWeiboLoading('正在生成微博数据...');
     try {
-        const res = await callLLM(prompt);
+        const response = await fetch(`${apiConfig.url.replace(/\/$/, '')}/chat/completions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiConfig.key}`
+            },
+            body: JSON.stringify({
+                model: apiConfig.model,
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.8
+            })
+        });
+
+        if (!response.ok) throw new Error('API 请求失败');
+        const resData = await response.json();
+        let res = resData.choices[0].message.content.trim();
+        res = res.replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();
         const data = JSON.parse(res);
         
         let weiboNpcs = JSON.parse(ChatDB.getItem('weibo_npcs') || '[]');
@@ -1477,11 +1546,11 @@ ${charsText}
         ChatDB.setItem('weibo_videos', JSON.stringify(data.videos));
         ChatDB.setItem('weibo_hot_topics', JSON.stringify(data.hotTopics));
 
-        hideGlobalToast();
-        showGlobalToast('生成成功！', 'success');
+        hideWeiboLoading();
+        showWeiboToast('生成成功！');
         initWeiboData(); // 刷新界面
     } catch (e) {
-        hideGlobalToast();
+        hideWeiboLoading();
         alert('生成失败，请检查 API 配置或重试。\n' + e.message);
     }
 }
@@ -1489,6 +1558,12 @@ ${charsText}
 // 2. 生成超话列表
 async function generateWeiboSuperTopicsAPI() {
     const currentLoginId = ChatDB.getItem('weibo_current_account');
+    
+    const apiConfig = JSON.parse(ChatDB.getItem('current_api_config') || '{}');
+    if (!apiConfig.url || !apiConfig.key || !apiConfig.model) {
+        return alert('请先在设置中配置 API 信息！');
+    }
+
     let wbText = "无特定世界书设定。";
     if (currentLoginId) {
         const selectedWbIds = JSON.parse(ChatDB.getItem(`weibo_wb_entries_${currentLoginId}`) || '[]');
@@ -1510,9 +1585,25 @@ ${wbText}
     ]
 }`;
 
-    showGlobalToast('正在生成超话...', 'loading');
+    showWeiboLoading('正在生成超话...');
     try {
-        const res = await callLLM(prompt);
+        const response = await fetch(`${apiConfig.url.replace(/\/$/, '')}/chat/completions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiConfig.key}`
+            },
+            body: JSON.stringify({
+                model: apiConfig.model,
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.8
+            })
+        });
+
+        if (!response.ok) throw new Error('API 请求失败');
+        const resData = await response.json();
+        let res = resData.choices[0].message.content.trim();
+        res = res.replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();
         const data = JSON.parse(res);
         
         data.topics.forEach(t => {
@@ -1523,52 +1614,24 @@ ${wbText}
         existingTopics = [...data.topics, ...existingTopics];
         ChatDB.setItem('weibo_super_topics', JSON.stringify(existingTopics));
 
-        hideGlobalToast();
-        showGlobalToast('生成成功！', 'success');
+        hideWeiboLoading();
+        showWeiboToast('生成成功！');
         initWeiboDiscoverSuperTopics();
     } catch (e) {
-        hideGlobalToast();
+        hideWeiboLoading();
         alert('生成失败：' + e.message);
     }
-}
-
-function openWeiboStGenModal() {
-    const listEl = document.getElementById('wbStGenCharList');
-    listEl.innerHTML = '';
-    
-    // 加载用户面具
-    let personas = JSON.parse(ChatDB.getItem('chat_personas') || '[]');
-    personas.forEach(p => {
-        const label = document.createElement('label');
-        label.style.cssText = 'display: flex; align-items: center; gap: 8px; font-size: 12px; color: #333; cursor: pointer;';
-        label.innerHTML = `<input type="checkbox" class="wb-st-gen-cb" value="persona_${p.id}" data-name="${p.name}" data-desc="${p.persona}" style="accent-color: #111;"> <span style="color:#888;">[面具]</span> ${p.name}`;
-        listEl.appendChild(label);
-    });
-
-    // 加载所有角色
-    let allChars = JSON.parse(ChatDB.getItem('chat_chars') || '[]');
-    allChars.forEach(c => {
-        const label = document.createElement('label');
-        label.style.cssText = 'display: flex; align-items: center; gap: 8px; font-size: 12px; color: #333; cursor: pointer;';
-        label.innerHTML = `<input type="checkbox" class="wb-st-gen-cb" value="char_${c.id}" data-name="${c.netName || c.name}" data-desc="${c.description}" style="accent-color: #111;"> <span style="color:#888;">[角色]</span> ${c.netName || c.name}`;
-        listEl.appendChild(label);
-    });
-    
-    if (personas.length === 0 && allChars.length === 0) {
-        listEl.innerHTML = '<div style="text-align:center; color:#aaa; font-size:12px;">暂无角色或面具</div>';
-    }
-    
-    document.getElementById('weiboStGenModalOverlay').classList.add('show');
-}
-
-function closeWeiboStGenModal() {
-    document.getElementById('weiboStGenModalOverlay').classList.remove('show');
 }
 
 // 3. 生成超话内的帖子
 async function generateWeiboSuperTopicPostsAPI() {
     const topicName = document.getElementById('wbSuperTitle').innerText.replace('超话', '');
     if (!topicName) return;
+
+    const apiConfig = JSON.parse(ChatDB.getItem('current_api_config') || '{}');
+    if (!apiConfig.url || !apiConfig.key || !apiConfig.model) {
+        return alert('请先在设置中配置 API 信息！');
+    }
 
     const postCount = document.getElementById('wbStGenPostCount').value || 3;
     const commentCount = document.getElementById('wbStGenCommentCount').value || 2;
@@ -1622,9 +1685,25 @@ ${associatedText}
     ]
 }`;
 
-    showGlobalToast('正在生成帖子...', 'loading');
+    showWeiboLoading('正在生成帖子...');
     try {
-        const res = await callLLM(prompt);
+        const response = await fetch(`${apiConfig.url.replace(/\/$/, '')}/chat/completions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiConfig.key}`
+            },
+            body: JSON.stringify({
+                model: apiConfig.model,
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.8
+            })
+        });
+
+        if (!response.ok) throw new Error('API 请求失败');
+        const resData = await response.json();
+        let res = resData.choices[0].message.content.trim();
+        res = res.replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();
         const data = JSON.parse(res);
         
         const currentLoginId = ChatDB.getItem('weibo_current_account');
@@ -1673,11 +1752,68 @@ ${associatedText}
             ChatDB.setItem(`weibo_posts_${currentLoginId}`, JSON.stringify(globalPosts));
         }
 
-        hideGlobalToast();
-        showGlobalToast('生成成功！', 'success');
+        hideWeiboLoading();
+        showWeiboToast('生成成功！');
         renderWeiboMockFeed('wbSuperFeed', topicName);
     } catch (e) {
-        hideGlobalToast();
+        hideWeiboLoading();
+        alert('生成失败：' + e.message);
+    }
+}
+
+async function generateWeiboHotTopicPostsAPI() {
+    const topicName = document.getElementById('wbHotDetailTitle').innerText.replace(/#/g, '');
+    if (!topicName) return;
+
+    const apiConfig = JSON.parse(ChatDB.getItem('current_api_config') || '{}');
+    if (!apiConfig.url || !apiConfig.key || !apiConfig.model) {
+        return alert('请先在设置中配置 API 信息！');
+    }
+
+    const prompt = `请为微博热搜“${topicName}”生成3条相关的网友讨论帖子。
+必须返回严格的 JSON 格式，不要有任何 markdown 标记，格式如下：
+{
+    "posts": [
+        { "authorName": "发帖人网名", "content": "帖子内容", "time": "刚刚", "likes": 12, "comments": 3 }
+    ]
+}`;
+
+    showWeiboLoading('正在生成帖子...');
+    try {
+        const response = await fetch(`${apiConfig.url.replace(/\/$/, '')}/chat/completions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiConfig.key}`
+            },
+            body: JSON.stringify({
+                model: apiConfig.model,
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.8
+            })
+        });
+
+        if (!response.ok) throw new Error('API 请求失败');
+        const resData = await response.json();
+        let res = resData.choices[0].message.content.trim();
+        res = res.replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();
+        const data = JSON.parse(res);
+        
+        data.posts.forEach(p => {
+            p.id = 'post_' + Date.now() + Math.floor(Math.random() * 1000);
+            p.authorAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.authorName}`;
+            p.time = Date.now();
+        });
+
+        let existingPosts = JSON.parse(ChatDB.getItem(`weibo_super_topic_posts_${topicName}`) || '[]');
+        existingPosts = [...data.posts, ...existingPosts];
+        ChatDB.setItem(`weibo_super_topic_posts_${topicName}`, JSON.stringify(existingPosts));
+
+        hideWeiboLoading();
+        showWeiboToast('生成成功！');
+        renderWeiboMockFeed('wbHotDetailFeed', topicName);
+    } catch (e) {
+        hideWeiboLoading();
         alert('生成失败：' + e.message);
     }
 }
@@ -2190,6 +2326,12 @@ async function generateWeiboCommentsAPI() {
     
     const currentLoginId = ChatDB.getItem('weibo_current_account');
     
+    // 读取 API 配置
+    const apiConfig = JSON.parse(ChatDB.getItem('current_api_config') || '{}');
+    if (!apiConfig.url || !apiConfig.key || !apiConfig.model) {
+        return alert('请先在设置中配置 API 信息！');
+    }
+    
     // 1. 获取世界书设定
     let wbText = "无特定世界书设定。";
     if (currentLoginId) {
@@ -2237,9 +2379,28 @@ ${existingCommentsText}
     ]
 }`;
 
-    showGlobalToast('正在生成评论...', 'loading');
+    showWeiboLoading('正在生成评论...');
     try {
-        const res = await callLLM(prompt);
+        const response = await fetch(`${apiConfig.url.replace(/\/$/, '')}/chat/completions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiConfig.key}`
+            },
+            body: JSON.stringify({
+                model: apiConfig.model,
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.8
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('API 请求失败');
+        }
+
+        const resData = await response.json();
+        let res = resData.choices[0].message.content.trim();
+        res = res.replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();
         const data = JSON.parse(res);
         
         if (!post.commentsList) post.commentsList = [];
@@ -2253,10 +2414,11 @@ ${existingCommentsText}
         post.comments = (post.comments || 0) + data.comments.length;
         updateWeiboPostInDB(post);
         
-        hideGlobalToast();
+        hideWeiboLoading();
+        showWeiboToast('生成成功！');
         renderWeiboComments(post);
     } catch (e) {
-        hideGlobalToast();
+        hideWeiboLoading();
         alert('生成失败：' + e.message);
     }
 }

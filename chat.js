@@ -5090,8 +5090,8 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
     const badgeAware = ChatDB.getItem(`chat_badge_aware_${targetCharId}`) === 'true';
     const boundEmojiGroups = JSON.parse(ChatDB.getItem(`chat_char_emoji_groups_${targetCharId}`) || '[]');
 
-    let chars = getAllEntities();
-    const char = chars.find(c => c.id === targetCharId);
+    let allEntities = getAllEntities();
+    const char = allEntities.find(c => c.id === targetCharId);
     if (!char) {
         isGeneratingApiReply = false;
         return;

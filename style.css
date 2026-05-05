@@ -8083,3 +8083,16 @@ body.ios-standalone .status-bar {
 #weiboPanel .wb-video-right-actions, #weiboPanel .wb-video-info {
     z-index: 10;
 }
+
+/* 微博专属 Loading 遮罩样式 */
+.weibo-loading-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+    z-index: 99999; display: none; flex-direction: column; justify-content: center; align-items: center; gap: 15px;
+}
+.weibo-loading-overlay.show { display: flex; }
+.weibo-loading-spinner {
+    width: 40px; height: 40px; border: 3px solid #f0f0f0; border-top: 3px solid #ff8200;
+    border-radius: 50%; animation: spin 1s linear infinite;
+}
+.weibo-loading-text { font-size: 14px; font-weight: bold; color: #333; letter-spacing: 1px; }
