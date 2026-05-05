@@ -3559,6 +3559,10 @@ function sendChatMessage() {
         // --- 新增：触发 Char 感知系统 ---
         injectCharPerception('send_msg', content, currentChatRoomCharId);
         // -------------------------------
+        
+        // 强制重置窗口滚动，防止 iOS Safari 键盘弹出时的原生滚动导致页面错位
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
     }, 10);
 }
 
@@ -5103,6 +5107,30 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
         return;
     }
 
+    // --- 核心修复：将转圈动画提前到所有 await (如天气请求) 之前，实现秒转圈 ---
+    if (!document.getElementById('chat-spin-keyframes')) {
+        const style = document.createElement('style');
+        style.id = 'chat-spin-keyframes';
+        style.innerHTML = `@keyframes chatAppSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+        document.head.appendChild(style);
+    }
+
+    const apiBtn = document.querySelector('.cr-api-btn');
+    let originalBtnHtml = '';
+    if (apiBtn) {
+        originalBtnHtml = apiBtn.innerHTML;
+        apiBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" style="animation: chatAppSpin 1s linear infinite;"><circle cx="12" cy="12" r="10" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="3"></circle><path d="M12 2a10 10 0 0 1 10 10" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"></path></svg>`;
+        apiBtn.style.pointerEvents = 'none';
+    }
+
+    const titleEl = document.getElementById('chatRoomTitle');
+    let originalTitleHtml = '';
+    if (titleEl) {
+        originalTitleHtml = titleEl.innerHTML; // 修复：使用 innerHTML 保护互动标识不被覆盖
+        titleEl.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" style="animation: chatAppSpin 1s linear infinite; vertical-align: middle; margin-right: 4px;"><circle cx="12" cy="12" r="10" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="3"></circle><path d="M12 2a10 10 0 0 1 10 10" fill="none" stroke="#888" stroke-width="3" stroke-linecap="round"></path></svg> Entering...`;
+    }
+    // -------------------------------------------------------------------------
+
     let accounts = JSON.parse(ChatDB.getItem('chat_accounts') || '[]');
     const account = accounts.find(a => a.id === currentLoginId);
     let personas = JSON.parse(ChatDB.getItem('chat_personas') || '[]');
@@ -5610,16 +5638,8 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
 
     messages = messages.concat(mergedHistory);
 
-    const apiBtn = document.querySelector('.cr-api-btn');
-    const originalBtnHtml = apiBtn.innerHTML;
-    apiBtn.innerHTML = '<div class="api-loading-spinner" style="width: 14px; height: 14px; border-color: rgba(255,255,255,0.3); border-top-color: #fff;"></div>';
-    apiBtn.style.pointerEvents = 'none';
-
-    const titleEl = document.getElementById('chatRoomTitle');
-    const originalTitle = titleEl.innerText;
-    titleEl.innerHTML = `<div class="api-loading-spinner" style="display:inline-block; width:12px; height:12px; margin-right:6px; border-color:rgba(0,0,0,0.1); border-top-color:#888; vertical-align:middle;"></div> Entering...`;
-
     try {
+
         const temp = parseFloat(apiConfig.temperature);
         const finalTemp = isNaN(temp) ? 0.8 : temp;
 
@@ -6086,9 +6106,13 @@ async function generateApiReply(isProactive = false, proactiveCharId = null) {
         showApiErrorModal(e.message || '网络请求失败，请检查 API 地址或网络连接。');
     } finally {
         isGeneratingApiReply = false; 
-        apiBtn.innerHTML = originalBtnHtml;
-        apiBtn.style.pointerEvents = 'auto';
-        titleEl.innerText = originalTitle;
+        if (apiBtn) {
+            apiBtn.innerHTML = originalBtnHtml;
+            apiBtn.style.pointerEvents = 'auto';
+        }
+        if (titleEl) {
+            titleEl.innerHTML = originalTitleHtml; // 修复：恢复完整的 HTML 结构，防止互动标识消失
+        }
     }
 }
 

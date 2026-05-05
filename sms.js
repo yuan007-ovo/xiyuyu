@@ -767,9 +767,17 @@ async function triggerSmsAiReply() {
 
     messages = messages.concat(mergedHistory);
 
+    if (!document.getElementById('chat-spin-keyframes')) {
+        const style = document.createElement('style');
+        style.id = 'chat-spin-keyframes';
+        style.innerHTML = `@keyframes chatAppSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+        document.head.appendChild(style);
+    }
+
     const aiBtn = document.querySelector('.sms-ios-ai-btn');
     const originalBtnHtml = aiBtn.innerHTML;
-    aiBtn.innerHTML = '<div style="width: 14px; height: 14px; border: 2px solid rgba(0,0,0,0.1); border-top-color: #007aff; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>';
+    // 使用纯 SVG 动画，彻底无视外部 CSS 干扰
+    aiBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" style="animation: chatAppSpin 1s linear infinite;"><circle cx="12" cy="12" r="10" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="3"></circle><path d="M12 2a10 10 0 0 1 10 10" fill="none" stroke="#007aff" stroke-width="3" stroke-linecap="round"></path></svg>`;
     aiBtn.style.pointerEvents = 'none';
 
     try {
